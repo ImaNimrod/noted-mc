@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
 
-    @Inject(at = @At("RETURN"), method = "render")
+    @Inject(method = "render", at = @At("RETURN"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo ci) {
         Noted.INSTANCE.onHudRender(matrixStack, tickDelta);
     }

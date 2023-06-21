@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixin {
 
-    @Inject(at = @At("RETURN"), method = "tick()V", cancellable = true)
-    private void tick(CallbackInfo ci) {
+    @Inject(method = "tick()V", at = @At("RETURN"), cancellable = true)
+    private void onTick(CallbackInfo ci) {
         Noted.INSTANCE.onTick();
     }   
 

@@ -7,11 +7,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
 
-    @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
-    private void onSendChatMessage(String message, CallbackInfo ci) {
+    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    private void onChatMessage(String message, CallbackInfo ci) {
         if (message.startsWith("%")) {
             if (message.substring(1).equalsIgnoreCase("activate")) {
                 Noted.INSTANCE.songPlayer.setActive(true);

@@ -1,10 +1,12 @@
 package net.nimrod.noted;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.math.MatrixStack;
 import net.nimrod.noted.playing.SongPlayer;
 import net.nimrod.noted.utils.RenderUtils;
 import net.nimrod.noted.utils.LogUtils;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.Color;
 
@@ -25,11 +27,18 @@ public class Noted implements ModInitializer {
 
     public void onHudRender(MatrixStack matrixStack, float tickDelta) {
         RenderUtils.drawString(matrixStack, NAME + " v" + VERSION, 4, 4, Color.WHITE);
-        RenderUtils.drawString(matrixStack, "Now Playing: " + songPlayer.getSongName(), 4, 16, Color.WHITE);
+
+        if (songPlayer.getActive())
+            RenderUtils.drawString(matrixStack, "Now Playing: " + songPlayer.getSongName(), 4, 16, Color.WHITE);
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
         songPlayer.onWorldRender(matrixStack);
+    }
+
+    public void onKey(int key, int action) {
+        if (key == GLFW.GLFW_KEY_Z && action == GLFW.GLFW_PRESS)
+            songPlayer.setActive(!songPlayer.getActive());
     }
 
     public void onTick() {

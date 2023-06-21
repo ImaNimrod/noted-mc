@@ -42,7 +42,7 @@ public class SongPlayer {
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    public boolean isActive() {
+    public boolean getActive() {
         return active;
     }
 
@@ -93,7 +93,10 @@ public class SongPlayer {
             case STAGING:
                 /* center player */
                 mc.player.setPosition(MathHelper.floor(mc.player.getX()) + 0.5, mc.player.getY(), MathHelper.floor(mc.player.getZ()) + 0.5);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+
+                /* look straight ahead */
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(-90.0f, 0.0f, mc.player.isOnGround()));
 
                 LogUtils.chatLog("Preparing noteblock stage...");
 
@@ -193,6 +196,8 @@ public class SongPlayer {
 
                 tuneNoteBlockDelayCount = 0;
 
+                mc.player.swingHand(Hand.MAIN_HAND);
+
                 int targetNote = e.getValue() < currentNote ? e.getValue() + 25 : e.getValue();
                 int requiredHits = Math.min(25, targetNote - currentNote);
 
@@ -208,6 +213,8 @@ public class SongPlayer {
     private void playSongTick() {
         currentSong.play(); 
         currentSong.advanceCurrentTime();
+
+        mc.player.swingHand(Hand.MAIN_HAND);
 
         while (currentSong.reachedNextNote()) {
             Note note = currentSong.getNextNote();
@@ -226,14 +233,14 @@ public class SongPlayer {
         if (!isValidNoteBlock(blockPos))
             return;
 
-        mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.DOWN, 0));
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.DOWN, 0));
     }
 
     private void tuneNoteBlock(BlockPos blockPos) {
         if (!isValidNoteBlock(blockPos))
             return;
 
-        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(blockPos), Direction.DOWN, blockPos, false), 0));
+        mc.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(blockPos), Direction.DOWN, blockPos, false), 0));
     }
 
     private Instrument getNoteBlockInstrument(BlockPos blockPos) {

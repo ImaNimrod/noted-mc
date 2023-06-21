@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
 
-	@Inject(at = @At("RETURN"), method = "render")
+	@Inject(method = "render", at = @At("RETURN"))
     private void onRender(MatrixStack matrixStack, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
         Noted.INSTANCE.onWorldRender(matrixStack);
     }
