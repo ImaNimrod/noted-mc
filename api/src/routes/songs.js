@@ -49,6 +49,11 @@ router.get("/", (req, res, next) => {
 });
 
 router.get("/:id", (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)){
+        next(createError("invalid song id value"));
+        return;
+    }
+
     Song.findById(req.params.id)
         .then((song) => {
             if (song !== null) {
@@ -86,6 +91,11 @@ router.post("/", uploads.single("file"), (req, res, next) => {
 });
 
 router.delete("/:id", (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)){
+        next(createError("invalid song id value"));
+        return;
+    }
+
     Song.findByIdAndRemove(req.params.id)
         .then((result) => {
             res.status(200).json(
