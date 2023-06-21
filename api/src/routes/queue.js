@@ -26,7 +26,7 @@ router.get("/next", (req, res, next) => {
         const nextSongId = songQueue.pop();
 
         res.status(200).json({
-            "id": `${nextSongId}`
+            "_id": `${nextSongId}`
         });
     }
 });
