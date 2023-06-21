@@ -37,6 +37,7 @@ public class Noted implements ModInitializer {
     public static final File SONG_DIR = new File(ROOT_DIR, "songs");
 
     public boolean active = false;
+    public boolean tuned = false;
     public boolean playing = false;
 
     public Song currentSong;
@@ -85,7 +86,31 @@ public class Noted implements ModInitializer {
             }
         }
 
-        // noteblock tuning 
+        if (!tuned) {
+            tuneNoteblocks();
+            return;
+        };
+
+        currentSong.play(); 
+        currentSong.advanceCurrentTime();
+
+        while (currentSong.reachedNextNote()) {
+            Note note = currentSong.getNextNote();
+
+            for (Entry<BlockPos, Integer> e : blockPitches.entrySet()) {
+                if (isNoteBlock(e.getKey()) && note.getNoteId() % 25 == getNote(e.getKey()))
+                    playNoteblock(e.getKey());
+            }
+        }
+
+        if (currentSong.finished()) {
+            currentSong = null;
+            playing = false;
+            tuned = false;
+        }
+    }
+
+    private void tuneNoteblocks() {
         for (Entry<BlockPos, Integer> e : blockPitches.entrySet()) {
             int note = getNote(e.getKey());
             if (note == -1)
@@ -105,24 +130,10 @@ public class Noted implements ModInitializer {
                 }
 
                 tuneDelay = 0;
-                return;
             }
         }
 
-        currentSong.play(); 
-        currentSong.advanceCurrentTime();
-
-        while (currentSong.reachedNextNote()) {
-            Note note = currentSong.getNextNote();
-
-            for (Entry<BlockPos, Integer> e : blockPitches.entrySet()) {
-                if (isNoteBlock(e.getKey()) && note.getNoteId() % 25 == getNote(e.getKey()))
-                    playNoteblock(e.getKey());
-            }
-        }
-
-        if (currentSong.finished())
-            currentSong = null;
+        tuned = true;
     }
 
     private void loadSong(File songFile) throws IOException, InvalidMidiDataException {
