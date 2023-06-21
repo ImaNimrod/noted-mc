@@ -38,7 +38,7 @@ router.get("/", (req, res, next) => {
                 songDataArray.push(new SongData(song));
             })
 
-            if (songDataArray.limits > 0) {
+            if (songDataArray.length > 0) {
                 res.status(200).json({
                     count: songDataArray.length,
                     songs: songDataArray 
