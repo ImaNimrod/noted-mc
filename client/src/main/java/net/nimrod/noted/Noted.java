@@ -11,6 +11,8 @@ import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -99,13 +101,10 @@ public class Noted implements ModInitializer {
                 int reqTunes = Math.min(25, neededNote - note);
 
                 for (int i = 0; i < reqTunes; i++) {
-                    mc.interactionManager.interactBlock(mc.player, 
-                             Hand.MAIN_HAND, 
-                             new BlockHitResult(Vec3d.ofCenter(e.getKey(), 1), Direction.UP, e.getKey(), true));
+                    mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(e.getKey()), Direction.DOWN, e.getKey(), false), 0));
                 }
 
                 tuneDelay = 0;
-
                 return;
             }
         }
@@ -168,8 +167,7 @@ public class Noted implements ModInitializer {
         if (!isNoteBlock(blockPos))
             return;
 
-        mc.interactionManager.attackBlock(blockPos, Direction.UP);
-        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.DOWN, 0));
     }
 
     private Instrument getInstrument(BlockPos blockPos) {
