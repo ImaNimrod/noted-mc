@@ -27,7 +27,7 @@ module.exports = {
             embeds: [
                 new EmbedBuilder().setTitle("Song List")
                                   .setColor(Colors.Blue)
-                                  .setDescription("   - " + songList.join("\n   - "))
+                                  .setDescription("- " + songList.join("\n- "))
                                   .setFooter({ text: "noted-mc v1.0.0" })
             ],
             ephemeral: true
