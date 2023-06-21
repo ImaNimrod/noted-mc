@@ -37,5 +37,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log("noted-mc api instance started on port: " + port);
+    console.log("noted-mc api instance started at on port: " + port);
 });
