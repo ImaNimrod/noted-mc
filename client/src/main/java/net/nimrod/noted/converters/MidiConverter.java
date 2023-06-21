@@ -7,6 +7,7 @@ import java.util.HashMap;
 import javax.sound.midi.*;
 import net.nimrod.noted.Noted;
 import net.nimrod.noted.song.*;
+import net.nimrod.noted.utils.LogUtils;
 
 public class MidiConverter {
 
@@ -17,7 +18,7 @@ public class MidiConverter {
 
 	public static Song getSongFromFile(File file) throws InvalidMidiDataException, IOException {
         MidiFileFormat midiFormat = MidiSystem.getMidiFileFormat(file);
-        Noted.INSTANCE.LOGGER.info(midiFormat.properties().toString());
+        LogUtils.consoleLog(midiFormat.properties().toString());
 
 		Sequence sequence = MidiSystem.getSequence(file);
 		return getSong(sequence, file.getName());

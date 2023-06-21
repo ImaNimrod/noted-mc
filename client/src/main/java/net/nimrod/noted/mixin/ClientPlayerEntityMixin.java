@@ -14,13 +14,13 @@ public class ClientPlayerEntityMixin {
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable=true)
     private void onChatMessage(String message, Text text, CallbackInfo ci) {
         if (message.startsWith("%")) {
-            if (message.substring(1).equalsIgnoreCase("stop")) {
-                Noted.INSTANCE.songPlayer.stop();
-            } else if (message.substring(1).equalsIgnoreCase("pause")) {
-                Noted.INSTANCE.songPlayer.getSong().pause();
-            } else {
-                Noted.INSTANCE.loadSong(message.substring(1));
+            if (message.substring(1).equalsIgnoreCase("activate")) {
+                Noted.INSTANCE.active = true;
+            } else if (message.substring(1).equalsIgnoreCase("stop")) {
+                Noted.INSTANCE.active = false;
+                Noted.INSTANCE.currentSong = null;
             }
+
             ci.cancel();
         }
     }
