@@ -98,8 +98,8 @@ router.delete("/:id", (req, res, next) => {
 
     Song.findByIdAndRemove(req.params.id)
         .then((result) => {
-            res.status(200).json(
-                {"message": `deleted song ${req.params.id}`
+            res.status(200).json({
+                "message": `deleted song ${req.params.id}`
             });
         })
         .catch(err => {
