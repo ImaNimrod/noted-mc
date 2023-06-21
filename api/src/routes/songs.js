@@ -7,12 +7,12 @@ const multer = require("multer");
 const Song = require("../models/songModel.js");
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === "application/octet-stream" || file.mimetype === "audio/midi") {
+    if (file.originalname.endsWith(".mid") || file.originalname.endsWith(".midi")) {
         cb(null, true);
     } else {
         cb(null, false);
     }
-};
+}
 
 const router = express.Router();
 const uploads = multer({
