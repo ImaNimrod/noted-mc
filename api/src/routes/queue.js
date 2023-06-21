@@ -22,7 +22,7 @@ router.get("/next", (req, res, next) => {
         currentSongId = null;
         res.status(204).json({});
     } else {
-        currentSongId = queue.pop();
+        currentSongId = queue.shift();
 
         res.status(200).json({
             "_id": `${currentSongId}`
