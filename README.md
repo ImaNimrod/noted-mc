@@ -67,7 +67,7 @@ client maps the noteblocks in its enviroment, tunes, and then plays them ([SongP
         - `MONGODB_PASSWORD = [your MongoDB account password]`
         - `MONGODB_CLUSTER = [name of your MongoDB cluster]`
         - `MONGODB_DB = [name of your MongoDB cluster's database]`
-        - `PORT=[the port you want the API to run on (default is 3000)]`
+        - `PORT = [the port you want the API to run on (default is 3000)]`
     - Run `npm i` to install dependencies.
     - Run `node src/index.js`, and your application will start running. If an error occurs, check that your MongoDB enviroment variables are present and correct.
 2. Deploy the Discord Bot layer:
