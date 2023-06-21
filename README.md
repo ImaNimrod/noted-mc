@@ -68,6 +68,7 @@ client maps the noteblocks in its enviroment, tunes, and then plays them ([SongP
         - `MONGODB_CLUSTER = [name of your MongoDB cluster]`
         - `MONGODB_DB = [name of your MongoDB cluster's database]`
         - `PORT=[the port you want the API to run on (default is 3000)]`
+    - Run `npm i` to install dependencies.
     - Run `node src/index.js`, and your application will start running. If an error occurs, check that your MongoDB enviroment variables are present and correct.
 2. Deploy the Discord Bot layer:
     - Create a new [Discord application](https://discord.com/developers/applications). Give it a sensible name, description, etc.
@@ -81,6 +82,7 @@ client maps the noteblocks in its enviroment, tunes, and then plays them ([SongP
         - `DISCORD_TOKEN = [the bot's token which you copied earlier]`
         - `DISCORD_CLIENT_ID = [the bot's client id from discord]`
         - `DISCORD_GUILD_ID = [the server that bot is apart of's guild id]`
+    - Run `npm i` to install dependencies.
     - Run `node src/index.js`, and you will see the bot connect and start running. You can now test it in the Discord server.
 3. Build and run the Minecraft Client:
     - We are going to build the client from source so, you need Java as well as the JDK (version >= 17).
