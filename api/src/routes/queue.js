@@ -1,55 +1,48 @@
+const createError = require("http-errors");
 const express = require("express");
-const router  = express.Router();
+const mongoose = require("mongoose");
 
-class Queue {
+const router = express.Router();
 
-    constructor() {
-        this.elements = {};
-        this.head = 0;
-        this.tail = 0;
-    }
+const Song = require("../models/songModel.js");
 
-    enqueue(element) {
-        this.elements[this.tail] = element;
-        this.tail++;
-    }
+let songQueue = [];
 
-    dequeue() {
-        const element = this.elements[this.head];
-        delete this.elements[this.head];
-        this.head++;
-
-        return element;
-    }
-
-    get size() {
-        return this.tail - this.head;
-    }
-
-    get isEmpty() {
-        return this.length === 0;
-    }
-
-}
-
-const songQueue = new Queue();
-
-router.get("/", (req, res) => {
-    if (songQueue.isEmpty) {
-       res.status(204).json({ "song": null }) 
+router.get("/", (req, res, next) => {
+    if (songQueue.length === 0) {
+        res.status(204).json({});
     } else {
-        let songName = songQueue.dequeue();
+        const nextSongId = songQueue.pop();
 
         res.status(200).json({
-            "song": songName
+            "id": `${nextSongId}`
         });
     }
 });
 
-router.post("/", (req, res) => {
-    res.status(200).json({
-        "message": "add song to queue"
-    });
-})
+router.post("/:id", (req, res, next) => {
+    const songId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(songId)){
+        next(createError("invalid song id value"));
+        return;
+    }
+
+    Song.findById(songId)
+        .then((song) => {
+            if (song !== null) {
+                songQueue.push(songId);
+
+                res.status(200).json({
+                    "message": `added song ${songId} to queue`
+                });
+            } else {
+                next(createError(404, "song not found"));
+            }
+        })
+        .catch((err) => {
+            next(createError(err.message));
+        });
+});
 
 module.exports = router;
