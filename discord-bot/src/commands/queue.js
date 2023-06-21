@@ -7,8 +7,8 @@ module.exports = {
     .setDescription("List the songs in the queue"),
 
     async execute(interaction, client) {
-        const queueData = await axios.get(`${process.env.NOTED_API_URL}/queue`);
-        const songData = await axios.get(`${process.env.NOTED_API_URL}/songs`);
+        const queueData = await axios.get(`${process.env.API_URL}/queue`);
+        const songData = await axios.get(`${process.env.API_URL}/songs`);
 
         if (queueData.status === 204) {
             return await interaction.reply({
@@ -17,7 +17,7 @@ module.exports = {
             });
         }
 
-        const currentSong = await axios.get(`${process.env.NOTED_API_URL}/queue/now`);
+        const currentSong = await axios.get(`${process.env.API_URL}/queue/now`);
 
         let currentSongName;
 

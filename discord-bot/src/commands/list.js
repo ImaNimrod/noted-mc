@@ -9,7 +9,7 @@ module.exports = {
     .setDescription("List songs that can be played"),
 
     async execute(interaction, client) {
-        const res = await axios.get(`${process.env.NOTED_API_URL}/songs`);
+        const res = await axios.get(`${process.env.API_URL}/songs`);
 
         let songList = [];
         res.data.songs.forEach((song) => {

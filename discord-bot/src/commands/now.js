@@ -7,8 +7,8 @@ module.exports = {
     .setDescription("Displays the currently playing song"),
 
     async execute(interaction, client) {
-        const songData = await axios.get(`${process.env.NOTED_API_URL}/songs`);
-        const currentSong = await axios.get(`${process.env.NOTED_API_URL}/queue/now`);
+        const songData = await axios.get(`${process.env.API_URL}/songs`);
+        const currentSong = await axios.get(`${process.env.API_URL}/queue/now`);
 
         let currentSongName;
 

@@ -11,7 +11,7 @@ module.exports = {
 
     async execute(interaction, client) {
         const songName = interaction.options.getString("song");
-        const res = await axios.get(`${process.env.NOTED_API_URL}/songs`);
+        const res = await axios.get(`${process.env.API_URL}/songs`);
 
         let songId;
 
@@ -28,7 +28,7 @@ module.exports = {
             });
         }
 
-        axios.post(`${process.env.NOTED_API_URL}/queue/${songId}`);
+        axios.post(`${process.env.API_URL}/queue/${songId}`);
 
         await interaction.reply({
             content: "Your song has been posted",
