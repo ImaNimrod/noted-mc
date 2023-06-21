@@ -59,16 +59,6 @@ public class Noted implements ModInitializer {
 
 	}
 
-    public void onRender(MatrixStack matrixStack, float tickDelta) {
-        if (noteBlocks.size() > 0) {
-            for (BlockPos blockPos : noteBlocks) {
-                Box box = new Box(blockPos);
-
-                RenderUtils.draw3DBox(matrixStack, box);
-            }
-        }
-    }
-
     public void onTick() {
         if (!active)
             return;
