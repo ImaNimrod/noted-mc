@@ -56,31 +56,35 @@ TODO
 ## How to Use This
 Truth be told, this code is probably not very useful to most people who find it. It is only open-source because that is just what I do for any serious programming projects I make. 
 The MIDI to noteblock conversion code may be interesting to some ([MidiConverter.java](/client/src/main/java/net/nimrod/noted/converters/MidiConverter.java)), as well as how the 
-client maps the noteblocks in its enviroment, tunes, and then plays them ([Noted.java](/client/src/main/java/net/nimrod/noted/playing/SongPlayer.java)). God forbid you do want to use this repo directly.
+client maps the noteblocks in its enviroment, tunes, and then plays them ([SongPlayer.java](/client/src/main/java/net/nimrod/noted/playing/SongPlayer.java)). God forbid you do want to use this repo directly, you should read ALL of the source code to make sure I am not stealing any of your discord or Minecraft info. I'm not, but don't take my word and just read the damn source code first. Once you have done that, (try to) follow these steps:
     
 1. Deploy the API layer:        
     - Create a MongoDB instance using something like [MongoDB Atlas](https://www.mongodb.com/atlas/database). Use the free tier (M0), create a new project, create a cluster
         for that project, and then create a database and collection in that cluster. This is where song schemas will be stored.
     - If you want the application to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
     - Create a ```.env``` file in the [api](/api) directory; inside of it, create the following enviroment variables:
-        - ```MONGODB_USER="[your MongoDB account username]"```
-        - ```MONGODB_PASSWORD="[your MongoDB account password]"```
-        - ```MONGODB_CLUSTER="[name of your MongoDB cluster]"```
-        - ```MONGODB_DB="[name of your MongoDB cluster's database]"```
-        - ```PORT="[the port you want the API to run on (default is 3000)]"```
-    - Run ```node src/index.js```, and your application will start running. If an error occurs, check that your MongoDB enviroment variables are present and correct.
+        - `MONGODB_USER = [your MongoDB account username]`
+        - `MONGODB_PASSWORD = [your MongoDB account password]`
+        - `MONGODB_CLUSTER = [name of your MongoDB cluster]`
+        - `MONGODB_DB = [name of your MongoDB cluster's database]`
+        - `PORT=[the port you want the API to run on (default is 3000)]`
+    - Run `node src/index.js`, and your application will start running. If an error occurs, check that your MongoDB enviroment variables are present and correct.
 2. Deploy the Discord Bot layer:
     - Create a new [Discord application](https://discord.com/developers/applications). Give it a sensible name, description, etc.
     - Create and configure the application's bot with a name, icon, etc. Copy the token somewhere for later use.
     - Ensure that under "Privileged Gateway Intents", all intent options are enabled and that under "Bot Permissions", "Send Messages" is enabled. Save your changes.
-    - Under OAuth2->URL Generator, select the scopes ```applications.commands``` and ```bot```.
+    - Under OAuth2->URL Generator, select the scopes `applications.commands` and `bot`.
     - Copy the generated URL and paste it into a text channel of the Discord server you want to add the bot to. Confirm that the configuration is correct, and add it to your server.
     - Again, if you want the bot to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
-    - Create a ```.env``` file in the [discord-bot](/discord-bot) directory; inside of it, create the enviroment variable, ```DISCORD_TOKEN="[the bot's token which you copied earlier]"```
-    - Run ```node src/index.js```, and you will see the bot connect and start running. You can now test it in the Discord server.
+    - Create a `.env` file in the [discord-bot](/discord-bot) directory; inside of it, create the following enviroment variables:
+        - `API_URL = [the url/ip to the server running the API instance that we set up earlier]`
+        - `DISCORD_TOKEN = [the bot's token which you copied earlier]`
+        - `DISCORD_CLIENT_ID = [the bot's client id from discord]`
+        - `DISCORD_GUILD_ID = [the server that bot is apart of's guild id]`
+    - Run `node src/index.js`, and you will see the bot connect and start running. You can now test it in the Discord server.
 3. Build and run the Minecraft Client:
     - We are going to build the client from source so, you need Java as well as the JDK (version >= 17).
     - Open a terminal/command prompt in the [client](/client) directory.
-    - Run, Linux/OSX: ```./gradlew build``` or Windows: ```./gradlew.bat build```. This will take a while, but it should finish without any errors.
-    - Copy the file ```noted-1.0.0.jar```from ```build/libs/``` to the ```mods``` directory of wherever your Minecraft Client folder is. You also need ```fabric-api``` in order to run the client.
-    - Install ```fabric``` for Minecraft 1.19.4 if you don't already have it, and then run the game.
+    - Run, Linux/OSX: `./gradlew build` or Windows: `./gradlew.bat build`. This will take a while, but it should finish without any errors.
+    - Copy the file `noted-1.0.0.jar` from `build/libs/` to the `mods` directory of wherever your Minecraft Client folder is. You also need `fabric-api` in order to run the client.
+    - Install `fabric` for Minecraft 1.19.4 if you don't already have it, and then run the game.
