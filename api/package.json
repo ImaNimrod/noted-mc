@@ -1,0 +1,14 @@
+{
+  "name": "noted-api",
+  "version": "1.0.0",
+  "description": "REST api middleware for the noted-mc project",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "author": "nimrod",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

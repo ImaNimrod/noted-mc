@@ -1,0 +1,15 @@
+{
+  "name": "noted-discord",
+  "version": "1.0.0",
+  "description": "discord bot that serves as a frontend for noted-mc",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "author": "nimrod",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.0.3"
+  }
+}

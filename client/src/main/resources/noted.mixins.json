@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.nimrod.noted.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+      "ClientPlayerEntityMixin",
+      "WorldRendererMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
