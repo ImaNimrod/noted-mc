@@ -27,8 +27,8 @@ module.exports = {
             }
         });
         
-        if (currentSongName === null) {
-            currentSongName = " ";
+        if (currentSongName == null) {
+            currentSongName = "";
         }
 
         let songList = [];
@@ -37,7 +37,7 @@ module.exports = {
         queueData.data.queue.forEach((item) => {
             songData.data.songs.forEach((song) => {
                 if (item === song._id) {
-                    songList.push(`${i}. ${song.name}`);
+                    songList.push(`**${i}.** ${song.name}`);
                 }
             });
 
@@ -48,7 +48,7 @@ module.exports = {
             embeds: [
                 new EmbedBuilder().setTitle("Song Queue")
                                   .setColor(Colors.Blue)
-                                  .setDescription("Now Playing: " + currentSongName + "\n    " + songList.join("\n   "))
+                                  .setDescription("**Now Playing:** " + currentSongName + "\n    " + songList.join("\n   "))
                                   .setFooter({ text: "noted-mc v1.0.0" })
             ],
             ephemeral: true

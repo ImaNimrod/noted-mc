@@ -18,12 +18,12 @@ module.exports = {
             }
         });
 
-        if (currentSongName === null) {
-            currentSongName = " ";
+        if (currentSongName == null) {
+            currentSongName = "No song playing";
         }
 
         await interaction.reply({
-            content: `Now playing: ${currentSongName}`,
+            content: `**Now playing:** ${currentSongName}`,
             ephemeral: true
         });
     }

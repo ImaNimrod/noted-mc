@@ -31,7 +31,7 @@ module.exports = {
         axios.post(`${process.env.NOTED_API_URL}/queue/${songId}`);
 
         await interaction.reply({
-            content: `Added song ${songName} to the queue`,
+            content: `Added song **${songName}** to the queue`,
             ephemeral: true
         });
     }
