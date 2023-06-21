@@ -17,8 +17,17 @@ module.exports = {
             });
         }
 
-        let songList = [];
+        const currentSongId = await axios.get(`${process.env.NOTED_API_URL}/queue/now`);
 
+        let currentSongName;
+
+        songData.data.songs.forEach((song) => {
+            if (currentSongId === song._id) {
+                currentSongName = `${song.name}`;
+            }
+        });
+
+        let songList = [];
         let songName;
         let i = 1;
 
@@ -37,7 +46,7 @@ module.exports = {
             embeds: [
                 new EmbedBuilder().setTitle("Song Queue")
                                   .setColor(Colors.Blue)
-                                  .setDescription("    " + songList.join("\n   "))
+                                  .setDescription("Now Playing: " currentSongName + "\n    " + songList.join("\n   "))
                                   .setFooter({ text: "noted-mc v1.0.0" })
             ],
             ephemeral: true
