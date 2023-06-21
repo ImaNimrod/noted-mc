@@ -37,7 +37,7 @@ module.exports = {
 
         const commandSender = await interaction.guild.members.fetch(interaction.user.id)
         await client.channels.cache
-                             .get("1105280211236442132")
+                             .get(interaction.channelId)
                              .send(`${commandSender} added song **${songName}** to the queue`);
     }
 }
