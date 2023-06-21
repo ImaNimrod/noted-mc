@@ -44,7 +44,7 @@ router.post("/:id", (req, res, next) => {
             if (song !== null) {
                 songQueue.push(songId);
 
-                res.status(200).json({
+                res.status(201).json({
                     "message": `added song ${songId} to queue`
                 });
             } else {
