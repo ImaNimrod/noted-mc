@@ -6,21 +6,21 @@ const router = express.Router();
 
 const Song = require("../models/songModel.js");
 
-let songQueue = [];
+let queue = [];
 
 router.get("/", (req, res, next) => {
-    if (songQueue.length === 0) {
+    if (queue.length === 0) {
         res.status(204).json({});
     } else {
-        res.status(200).json({songQueue});
+        res.status(200).json({queue});
     }
 });
 
 router.get("/next", (req, res, next) => {
-    if (songQueue.length === 0) {
+    if (queue.length === 0) {
         res.status(204).json({});
     } else {
-        const nextSongId = songQueue.pop();
+        const nextSongId = queue.pop();
 
         res.status(200).json({
             "_id": `${nextSongId}`
@@ -39,7 +39,7 @@ router.post("/:id", (req, res, next) => {
     Song.findById(songId)
         .then((song) => {
             if (song !== null) {
-                songQueue.push(songId);
+                queue.push(songId);
 
                 res.status(201).json({
                     "message": `added song ${songId} to queue`

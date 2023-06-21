@@ -31,15 +31,15 @@ function SongData(data) {
 
 router.get("/", (req, res, next) => {
     Song.find({})
-        .then((songs) => {
-            let songDataArray = [];
+        .then((songDataArray) => {
+            let songs = [];
 
-            songs.forEach((song) => {
-                songDataArray.push(new SongData(song));
+            songDataArray.forEach((song) => {
+                songs.push(new SongData(song));
             })
 
-            if (songDataArray.length > 0) {
-                res.status(200).json({songDataArray});
+            if (songs.length > 0) {
+                res.status(200).json({songs});
             } else {
                 res.status(204).json({});
             }
