@@ -38,10 +38,14 @@ router.get("/", (req, res, next) => {
                 songDataArray.push(new SongData(song));
             })
 
-            res.status((songDataArray.length > 0) ? 200 : 204).json({
-                count: songDataArray.length,
-                songs: songDataArray 
-            });
+            if (songDataArray.limits > 0) {
+                res.status(200).json({
+                    count: songDataArray.length,
+                    songs: songDataArray 
+                });
+            } else {
+                res.status(204).json({});
+            }
         })
         .catch((err) => {
             next(createError(err.message));

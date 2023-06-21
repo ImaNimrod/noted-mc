@@ -10,9 +10,7 @@ let songQueue = [];
 
 router.get("/", (req, res, next) => {
     if (songQueue.length === 0) {
-        res.status(200).json({
-            message: "song queue is empty" 
-        });
+        res.status(204).json({});
     } else {
         res.status(200).json({
             count: songQueue.length,
@@ -23,9 +21,7 @@ router.get("/", (req, res, next) => {
 
 router.get("/next", (req, res, next) => {
     if (songQueue.length === 0) {
-        res.status(200).json({
-            message: "song queue is empty" 
-        });
+        res.status(204).json({});
     } else {
         const nextSongId = songQueue.pop();
 
