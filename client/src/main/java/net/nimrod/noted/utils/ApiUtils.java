@@ -1,18 +1,20 @@
 package net.nimrod.noted.utils;
 
 import com.google.gson.*;
+import net.nimrod.noted.Noted;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import net.nimrod.noted.Noted;
+import java.util.List;
 
 public class ApiUtils {
 
     private static final String apiURL = "http://stardustdiving.xyz:4546";
 
-    public static ArrayList<JsonElement> getSongs() {
+    public static List<JsonElement> getSongs() {
         String res = apiGET("/songs");
 
         JsonElement jsonElement = JsonParser.parseString(res);
@@ -21,7 +23,7 @@ public class ApiUtils {
 
         JsonArray songData = jsonElement.getAsJsonObject().get("songs").getAsJsonArray();
 
-        ArrayList<JsonElement> songs = new ArrayList<JsonElement>();
+        List<JsonElement> songs = new ArrayList<>();
 
         for (JsonElement songElement: songData)
             songs.add(songElement);
@@ -29,7 +31,7 @@ public class ApiUtils {
         return songs;
     }
 
-    public static String getNextSong() {
+    public static String getNextSongId() {
         String res = apiGET("/queue/next");
 
         JsonElement jsonElement = JsonParser.parseString(res);
@@ -45,13 +47,18 @@ public class ApiUtils {
         return nextSongId;
     }
 
-    public static File getSong(String songId) throws IOException, MalformedURLException {
-        File songFile = new File(Noted.SONG_DIR, songId);
+    public static String getSongName(String songId) {
+        List<JsonElement> songs = getSongs(); 
 
-        // if file has already been downloaded, dont download it again
-        if (!songFile.createNewFile())
-            return songFile;
+        for (JsonElement songElement : songs) {
+            if (songElement.getAsJsonObject().get("_id").getAsString().equals(songId))
+                return songElement.getAsJsonObject().get("name").getAsString();
+        }
 
+        return null;
+    }
+
+    public static byte[] getSong(String songId) throws IOException, MalformedURLException {
         URL url = new URL(apiURL + "/songs/" + songId);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -61,23 +68,20 @@ public class ApiUtils {
         connection.setReadTimeout(10000);
 
         BufferedInputStream downloadStream = new BufferedInputStream(connection.getInputStream());
-        FileOutputStream fileOutputStream = new FileOutputStream(songFile);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try {
             int result; 
 
             while((result = downloadStream.read()) != -1)
-                fileOutputStream.write((byte) result);
+                byteArrayOutputStream.write((byte) result);
         } finally {
             downloadStream.close();
-
-            fileOutputStream.flush();
-            fileOutputStream.close();
 
             if (connection != null)
                 connection.disconnect();
 
-            return songFile; 
+            return byteArrayOutputStream.toByteArray();
         }
     }
 

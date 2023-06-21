@@ -10,14 +10,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
 
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo ci) {
         if (message.startsWith("%")) {
             if (message.substring(1).equalsIgnoreCase("activate")) {
-                Noted.INSTANCE.active = true;
+                Noted.INSTANCE.songPlayer.setActive(true);
             } else if (message.substring(1).equalsIgnoreCase("stop")) {
-                Noted.INSTANCE.active = false;
-                Noted.INSTANCE.currentSong = null;
+                Noted.INSTANCE.songPlayer.setActive(false);
+                Noted.INSTANCE.songPlayer.reset();
             }
 
             ci.cancel();

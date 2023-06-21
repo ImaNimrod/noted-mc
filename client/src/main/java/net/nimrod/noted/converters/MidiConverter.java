@@ -1,30 +1,24 @@
 package net.nimrod.noted.converters;
 
+import net.nimrod.noted.Noted;
+import net.nimrod.noted.song.*;
+import net.nimrod.noted.utils.LogUtils;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.sound.midi.*;
-import net.nimrod.noted.Noted;
-import net.nimrod.noted.song.*;
-import net.nimrod.noted.utils.LogUtils;
 
 public class MidiConverter {
 
-    private static final int NOTE_ON         = 0x90;
-    private static final int NOTE_OFF        = 0x80;
-    private static final int SET_TEMPO       = 0x51;
-    private static final int SET_INSTRUMENT  = 0xC0;
-
-	public static Song getSongFromFile(File file) throws InvalidMidiDataException, IOException {
-        MidiFileFormat midiFormat = MidiSystem.getMidiFileFormat(file);
-        LogUtils.consoleLog(midiFormat.properties().toString());
-
-		Sequence sequence = MidiSystem.getSequence(file);
-		return getSong(sequence, file.getName());
-	}
+    private static final int NOTE_ON = 0x90;
+    private static final int NOTE_OFF = 0x80;
+    private static final int SET_TEMPO = 0x51;
+    private static final int SET_INSTRUMENT = 0xC0;
 
 	public static Song getSongFromBytes(byte[] bytes, String name) throws InvalidMidiDataException, IOException {
+        LogUtils.consoleLog(Integer.toString(bytes[0]));
 		Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(bytes));
 		return getSong(sequence, name);
 	}
@@ -98,10 +92,8 @@ public class MidiConverter {
                             microTime += (mpq / tpq) * deltaTick;
 
                             Note note = null;
-                            int pitch = sm.getData1();
-
                             if (sm.getChannel() != 9)
-                                note = getMidiInstrumentNote(instrumentIds[sm.getChannel()], pitch, microTime);
+                                note = getMidiInstrumentNote(instrumentIds[sm.getChannel()], sm.getData1(), microTime);
 
                             if (note != null)
                                 song.getNotes().add(note);
@@ -153,155 +145,223 @@ public class MidiConverter {
 		return new Note(noteId, time);
 	}
 
+    private static Note getMidiPercussionNote(int midiPitch, long microTime) {
+        if (percussionMap.containsKey(midiPitch)) {
+            int noteId = percussionMap.get(midiPitch);
+            long time = microTime / 1000L;
+
+            return new Note(noteId, time);
+        }
+
+        return null;
+    }
+
     public static HashMap<Integer, NoteblockInstrument[]> instrumentMap = new HashMap<Integer, NoteblockInstrument[]>();
     static {
         // Piano (HARP BASS BELL)
-        instrumentMap.put(0,  new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Acoustic Grand Piano
-        instrumentMap.put(1,  new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Bright Acoustic Piano
-        instrumentMap.put(2,  new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Grand Piano
-        instrumentMap.put(3,  new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Honky-tonk Piano
-        instrumentMap.put(4,  new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Piano 1
-        instrumentMap.put(5,  new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Piano 2
-        instrumentMap.put(6,  new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Harpsichord
-        instrumentMap.put(7,  new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Clavinet
+        instrumentMap.put(0,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Acoustic Grand Piano
+        instrumentMap.put(1,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Bright Acoustic Piano
+        instrumentMap.put(2,  new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Grand Piano
+        instrumentMap.put(3,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Honky-tonk Piano
+        instrumentMap.put(4,  new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Piano 1
+        instrumentMap.put(5,  new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL}); // Electric Piano 2
+        instrumentMap.put(6,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Harpsichord
+        instrumentMap.put(7,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Clavinet
 
         // Chromatic Percussion (IRON_XYLOPHONE XYLOPHONE BASS)
-        instrumentMap.put(8,  new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Celesta
-        instrumentMap.put(9,  new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Glockenspiel
-        instrumentMap.put(10, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Music Box
-        instrumentMap.put(11, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Vibraphone
-        instrumentMap.put(12, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Marimba
-        instrumentMap.put(13, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Xylophone
-        instrumentMap.put(14, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Tubular Bells
-        instrumentMap.put(15, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE}); // Dulcimer
+        instrumentMap.put(8,  new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Celesta
+        instrumentMap.put(9,  new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Glockenspiel
+        instrumentMap.put(10, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Music Box
+        instrumentMap.put(11, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Vibraphone
+        instrumentMap.put(12, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Marimba
+        instrumentMap.put(13, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Xylophone
+        instrumentMap.put(14, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Tubular Bells
+        instrumentMap.put(15, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE }); // Dulcimer
 
         // Organ (BIT DIDGERIDOO BELL)
-        instrumentMap.put(16, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Drawbar Organ
-        instrumentMap.put(17, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Percussive Organ
-        instrumentMap.put(18, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Rock Organ
-        instrumentMap.put(19, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Church Organ
-        instrumentMap.put(20, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Reed Organ
-        instrumentMap.put(21, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Accordian
-        instrumentMap.put(22, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Harmonica
-        instrumentMap.put(23, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Tango Accordian
+        instrumentMap.put(16, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Drawbar Organ
+        instrumentMap.put(17, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Percussive Organ
+        instrumentMap.put(18, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Rock Organ
+        instrumentMap.put(19, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Church Organ
+        instrumentMap.put(20, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Reed Organ
+        instrumentMap.put(21, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Accordian
+        instrumentMap.put(22, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Harmonica
+        instrumentMap.put(23, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Tango Accordian
 
         // Guitar (BIT DIDGERIDOO BELL)
-        instrumentMap.put(24, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Acoustic Guitar (nylon)
-        instrumentMap.put(25, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Acoustic Guitar (steel)
-        instrumentMap.put(26, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Electric Guitar (jazz)
-        instrumentMap.put(27, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Electric Guitar (clean)
-        instrumentMap.put(28, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Electric Guitar (muted)
-        instrumentMap.put(29, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE});             // Overdriven Guitar
-        instrumentMap.put(30, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE});             // Distortion Guitar
-        instrumentMap.put(31, new NoteblockInstrument[] {NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Guitar Harmonics
+        instrumentMap.put(24, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Acoustic Guitar (nylon)
+        instrumentMap.put(25, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Acoustic Guitar (steel)
+        instrumentMap.put(26, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Electric Guitar (jazz)
+        instrumentMap.put(27, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Electric Guitar (clean)
+        instrumentMap.put(28, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Electric Guitar (muted)
+        instrumentMap.put(29, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE });                      // Overdriven Guitar
+        instrumentMap.put(30, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE });                      // Distortion Guitar
+        instrumentMap.put(31, new NoteblockInstrument[] { NoteblockInstrument.GUITAR,     NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Guitar Harmonics
 
         // Bass
-        instrumentMap.put(32, new NoteblockInstrument[] {NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL});      // Acoustic Bass
-        instrumentMap.put(33, new NoteblockInstrument[] {NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL});      // Electric Bass (finger)
-        instrumentMap.put(34, new NoteblockInstrument[] {NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL});      // Electric Bass (pick)
-        instrumentMap.put(35, new NoteblockInstrument[] {NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL});      // Fretless Bass
-        instrumentMap.put(36, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Slap Bass 1
-        instrumentMap.put(37, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Slap Bass 2
-        instrumentMap.put(38, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Synth Bass 1
-        instrumentMap.put(39, new NoteblockInstrument[] {NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE}); // Synth Bass 2
+        instrumentMap.put(32, new NoteblockInstrument[] { NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL });      // Acoustic Bass
+        instrumentMap.put(33, new NoteblockInstrument[] { NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL });      // Electric Bass (finger)
+        instrumentMap.put(34, new NoteblockInstrument[] { NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL });      // Electric Bass (pick)
+        instrumentMap.put(35, new NoteblockInstrument[] { NoteblockInstrument.BASS,        NoteblockInstrument.HARP, NoteblockInstrument.BELL });      // Fretless Bass
+        instrumentMap.put(36, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Slap Bass 1
+        instrumentMap.put(37, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Slap Bass 2
+        instrumentMap.put(38, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Synth Bass 1
+        instrumentMap.put(39, new NoteblockInstrument[] { NoteblockInstrument.DIDGERIDOO,  NoteblockInstrument.BIT,  NoteblockInstrument.XYLOPHONE }); // Synth Bass 2
 
         // Strings
-        instrumentMap.put(40, new NoteblockInstrument[] {NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Violin
-        instrumentMap.put(41, new NoteblockInstrument[] {NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Viola
-        instrumentMap.put(42, new NoteblockInstrument[] {NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Cello
-        instrumentMap.put(43, new NoteblockInstrument[] {NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Contrabass
-        instrumentMap.put(44, new NoteblockInstrument[] {NoteblockInstrument.BIT,         NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});                  // Tremolo Strings
-        instrumentMap.put(45, new NoteblockInstrument[] {NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.BELL});                  // Pizzicato Strings
-        instrumentMap.put(46, new NoteblockInstrument[] {NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.CHIME});                 // Orchestral Harp
-        instrumentMap.put(47, new NoteblockInstrument[] {NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.BELL});                  // Timpani
+        instrumentMap.put(40, new NoteblockInstrument[] { NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Violin
+        instrumentMap.put(41, new NoteblockInstrument[] { NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Viola
+        instrumentMap.put(42, new NoteblockInstrument[] { NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Cello
+        instrumentMap.put(43, new NoteblockInstrument[] { NoteblockInstrument.FLUTE,       NoteblockInstrument.GUITAR,     NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Contrabass
+        instrumentMap.put(44, new NoteblockInstrument[] { NoteblockInstrument.BIT,         NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });                           // Tremolo Strings
+        instrumentMap.put(45, new NoteblockInstrument[] { NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.BELL });                           // Pizzicato Strings
+        instrumentMap.put(46, new NoteblockInstrument[] { NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.CHIME });                          // Orchestral Harp
+        instrumentMap.put(47, new NoteblockInstrument[] { NoteblockInstrument.HARP,        NoteblockInstrument.BASS,       NoteblockInstrument.BELL });                           // Timpani
 
         // Ensenble
-        instrumentMap.put(48, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // String Ensemble 1
-        instrumentMap.put(49, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // String Ensemble 2
-        instrumentMap.put(50, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Synth Strings 1
-        instrumentMap.put(51, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Synth Strings 2
-        instrumentMap.put(52, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Choir Aahs
-        instrumentMap.put(53, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Voice Oohs
-        instrumentMap.put(54, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Synth Choir
-        instrumentMap.put(55, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL}); // Orchestra Hit
+        instrumentMap.put(48, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // String Ensemble 1
+        instrumentMap.put(49, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // String Ensemble 2
+        instrumentMap.put(50, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Synth Strings 1
+        instrumentMap.put(51, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Synth Strings 2
+        instrumentMap.put(52, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Choir Aahs
+        instrumentMap.put(53, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Voice Oohs
+        instrumentMap.put(54, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Synth Choir
+        instrumentMap.put(55, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS, NoteblockInstrument.BELL }); // Orchestra Hit
 
         // Brass
-        instrumentMap.put(56, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(57, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(58, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(59, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(60, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(61, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(62, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(63, new NoteblockInstrument[] {NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
+        instrumentMap.put(56, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(57, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(58, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(59, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(60, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(61, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(62, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(63, new NoteblockInstrument[] { NoteblockInstrument.BIT, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
 
         // Reed
-        instrumentMap.put(64, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(65, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(66, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(67, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(68, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(69, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(70, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(71, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
+        instrumentMap.put(64, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(65, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(66, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(67, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(68, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(69, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(70, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(71, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
 
         // Pipe
-        instrumentMap.put(72, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(73, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(74, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(75, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(76, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(77, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(78, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
-        instrumentMap.put(79, new NoteblockInstrument[] {NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL});
+        instrumentMap.put(72, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(73, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(74, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(75, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(76, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(77, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(78, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
+        instrumentMap.put(79, new NoteblockInstrument[] { NoteblockInstrument.FLUTE, NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BELL });
 
         // Synth Lead
-        instrumentMap.put(80, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(81, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(82, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(83, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(84, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(85, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(86, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(87, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
+        instrumentMap.put(80, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(81, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(82, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(83, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(84, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(85, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(86, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(87, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
 
-        // Synth Pad
-        instrumentMap.put(88, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(89, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(90, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(91, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(92, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(93, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(94, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(95, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
+        // Synth Pad (HARP BASS BELL)
+        instrumentMap.put(88, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(89, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(90, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(91, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(92, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(93, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(94, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(95, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
 
         // Synth Effects
-        instrumentMap.put(98, new NoteblockInstrument[]{ NoteblockInstrument.BIT,   NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(99, new NoteblockInstrument[]{ NoteblockInstrument.HARP,  NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(100, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(101, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(102, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
-        instrumentMap.put(103, new NoteblockInstrument[] {NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL});
+        instrumentMap.put(98,  new NoteblockInstrument[] { NoteblockInstrument.BIT,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(99,  new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(100, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(101, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(102, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(103, new NoteblockInstrument[] { NoteblockInstrument.HARP, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
 
         // Ethnic
-        instrumentMap.put(104, new NoteblockInstrument[] {NoteblockInstrument.BANJO, NoteblockInstrument.BASS, NoteblockInstrument.BELL});
-        instrumentMap.put(105, new NoteblockInstrument[] {NoteblockInstrument.BANJO, NoteblockInstrument.BASS, NoteblockInstrument.BELL});
-        instrumentMap.put(106, new NoteblockInstrument[] {NoteblockInstrument.BANJO, NoteblockInstrument.BASS, NoteblockInstrument.BELL});
-        instrumentMap.put(107, new NoteblockInstrument[] {NoteblockInstrument.BANJO, NoteblockInstrument.BASS, NoteblockInstrument.BELL});
-        instrumentMap.put(108, new NoteblockInstrument[] {NoteblockInstrument.BANJO, NoteblockInstrument.BASS, NoteblockInstrument.BELL});
-        instrumentMap.put(109, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(110, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
-        instrumentMap.put(111, new NoteblockInstrument[] {NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL});
+        instrumentMap.put(104, new NoteblockInstrument[] { NoteblockInstrument.BANJO, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(105, new NoteblockInstrument[] { NoteblockInstrument.BANJO, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(106, new NoteblockInstrument[] { NoteblockInstrument.BANJO, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(107, new NoteblockInstrument[] { NoteblockInstrument.BANJO, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(108, new NoteblockInstrument[] { NoteblockInstrument.BANJO, NoteblockInstrument.BASS,       NoteblockInstrument.BELL });
+        instrumentMap.put(109, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(110, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
+        instrumentMap.put(111, new NoteblockInstrument[] { NoteblockInstrument.HARP,  NoteblockInstrument.DIDGERIDOO, NoteblockInstrument.BELL });
 
         // Percussive
-        instrumentMap.put(112, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(113, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(114, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(115, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(116, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(117, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(118, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
-        instrumentMap.put(119, new NoteblockInstrument[] {NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE});
+        instrumentMap.put(112, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(113, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(114, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(115, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(116, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(117, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(118, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
+        instrumentMap.put(119, new NoteblockInstrument[] { NoteblockInstrument.IRON_XYLOPHONE, NoteblockInstrument.BASS, NoteblockInstrument.XYLOPHONE });
     }
+
+    public static HashMap<Integer, Integer> percussionMap = new HashMap<>();
+	static {
+		percussionMap.put(35, 10 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(36, 6  + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(37, 6  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(38, 8  + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(39, 6  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(40, 4  + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(41, 6  + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(42, 22 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(43, 13 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(44, 22 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(45, 15 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(46, 18 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(47, 20 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(48, 23 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(49, 17 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(50, 23 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(51, 24 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(52, 8  + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(53, 13 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(54, 18 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(55, 18 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(56, 1  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(57, 13 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(58, 2  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(59, 13 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(60, 9  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(61, 2  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(62, 8  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(63, 22 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(64, 15 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(65, 13 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(66, 8  + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(67, 8  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(68, 3  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(69, 20 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(70, 23 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(71, 24 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(72, 24 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(73, 17 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(74, 11 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(75, 18 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(76, 9  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(77, 5  + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(78, 22 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(79, 19 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(80, 17 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(81, 22 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(82, 22 + 25 * NoteblockInstrument.SNARE.instrumentId);
+		percussionMap.put(83, 24 + 25 * NoteblockInstrument.CHIME.instrumentId);
+		percussionMap.put(84, 24 + 25 * NoteblockInstrument.CHIME.instrumentId);
+		percussionMap.put(85, 21 + 25 * NoteblockInstrument.HAT.instrumentId);
+		percussionMap.put(86, 14 + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+		percussionMap.put(87, 7  + 25 * NoteblockInstrument.BASEDRUM.instrumentId);
+	}
 
 }
