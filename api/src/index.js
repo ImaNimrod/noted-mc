@@ -2,13 +2,13 @@ const createError = require("http-errors");
 const express = require("express"); 
 const mongoose = require("mongoose");
 
+require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 const queueRoute = require("./routes/queue.js");
 const songsRoute = require("./routes/songs.js");
-
-require("dotenv").config();
 
 mongoose.connect(
     `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_CLUSTER}.mongodb.net/${process.env.MONGODB_DB}?retryWrites=true&w=majority`, {
