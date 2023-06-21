@@ -39,10 +39,7 @@ router.get("/", (req, res, next) => {
             })
 
             if (songDataArray.length > 0) {
-                res.status(200).json({
-                    count: songDataArray.length,
-                    songs: songDataArray 
-                });
+                res.status(200).json({songDataArray});
             } else {
                 res.status(204).json({});
             }

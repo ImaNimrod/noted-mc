@@ -12,10 +12,7 @@ router.get("/", (req, res, next) => {
     if (songQueue.length === 0) {
         res.status(204).json({});
     } else {
-        res.status(200).json({
-            count: songQueue.length,
-            queue: songQueue
-        });
+        res.status(200).json({songQueue});
     }
 });
 
