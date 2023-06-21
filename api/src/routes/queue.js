@@ -7,6 +7,7 @@ const router = express.Router();
 const Song = require("../models/songModel.js");
 
 let queue = [];
+let currentSongId = null;
 
 router.get("/", (req, res, next) => {
     if (queue.length === 0) {
@@ -20,11 +21,21 @@ router.get("/next", (req, res, next) => {
     if (queue.length === 0) {
         res.status(204).json({});
     } else {
-        const nextSongId = queue.pop();
+        currentSongId = queue.pop();
 
         res.status(200).json({
-            "_id": `${nextSongId}`
+            "_id": `${currentSongId}`
         });
+    }
+});
+
+router.get("/now", (req, res, next) => {
+    if (currentSongId !== null) {
+        res.status(200).json({
+            "_id": `${currentSongId}`
+        });
+    } else {
+        res.status(204).json({});
     }
 });
 
