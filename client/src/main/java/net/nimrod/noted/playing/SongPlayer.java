@@ -96,7 +96,12 @@ public class SongPlayer {
                 mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
 
                 /* look straight ahead */
+<<<<<<< HEAD
                 mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(-90.0f, 0.0f, mc.player.isOnGround()));
+=======
+                mc.player.setYaw(-90.0f);
+                mc.player.setPitch(0.0f);
+>>>>>>> 2207d5b (client: added toggle keybind, improved noteblock scanning)
 
                 LogUtils.chatLog("Preparing noteblock stage...");
 
