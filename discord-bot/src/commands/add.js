@@ -30,8 +30,14 @@ module.exports = {
 
         axios.post(`${process.env.NOTED_API_URL}/queue/${songId}`);
 
+        await interaction.reply({
+            content: "Your song has been posted",
+            ephemeral: true
+        });
+
+        const commandSender = await interaction.guild.members.fetch(interaction.user.id)
         await client.channels.cache
                              .get("1105280211236442132")
-                             .send(`Added song **${songName}** to the queue`);
+                             .send(`${commandSender} added song **${songName}** to the queue`);
     }
 }
