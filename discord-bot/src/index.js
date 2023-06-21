@@ -1,7 +1,6 @@
-const { Client, IntentsBitField } = require("discord.js");
-const dotenv = require("dotenv");
+const { Client, Collection, IntentsBitField } = require("discord.js");
 
-dotenv.config();
+require("dotenv").config();
 
 const client = new Client({
     intents: [
@@ -12,17 +11,14 @@ const client = new Client({
     ]
 });
 
-client.on("ready", (c) => {
-    console.log(`${c.user.tag} is online`);
-});
+client.commands = new Collection();
 
-client.on('messageCreate', (message) => {
-    if (message.author.bot)
-        return;
+(async () => {
+    require("./handlers/commandHandler.js")(client);
+    require("./handlers/eventHandler.js")(client);
 
-    if (message.content === "test") {
-        message.reply("bruh");
-    }
-})
+    client.handleCommands("./src/commands");
+    client.handleEvents("./src/events");
 
-client.login(process.env.TOKEN);
+    client.login(process.env.DISCORD_TOKEN);
+})();
