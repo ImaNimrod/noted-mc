@@ -19,6 +19,7 @@ router.get("/", (req, res, next) => {
 
 router.get("/next", (req, res, next) => {
     if (queue.length === 0) {
+        currentSongId = null;
         res.status(204).json({});
     } else {
         currentSongId = queue.pop();

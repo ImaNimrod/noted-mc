@@ -11,10 +11,9 @@ module.exports = {
 
     async execute(interaction, client) {
         const songName = interaction.options.getString("song");
+        const res = await axios.get(`${process.env.NOTED_API_URL}/songs`);
 
         let songId;
-
-        const res = await axios.get(`${process.env.NOTED_API_URL}/songs`);
 
         res.data.songs.forEach((song) => {
             if (song.name === songName) {
@@ -32,7 +31,7 @@ module.exports = {
         axios.post(`${process.env.NOTED_API_URL}/queue/${songId}`);
 
         await interaction.reply({
-            content: `Added song "${songName}" to the queue`,
+            content: `Added song ${songName} to the queue`,
             ephemeral: true
         });
     }

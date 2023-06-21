@@ -17,25 +17,27 @@ module.exports = {
             });
         }
 
-        const currentSongId = await axios.get(`${process.env.NOTED_API_URL}/queue/now`);
+        const currentSong = await axios.get(`${process.env.NOTED_API_URL}/queue/now`);
 
         let currentSongName;
 
         songData.data.songs.forEach((song) => {
-            if (currentSongId === song._id) {
+            if (currentSong.data._id === song._id) {
                 currentSongName = `${song.name}`;
             }
         });
+        
+        if (currentSongName === null) {
+            currentSongName = " ";
+        }
 
         let songList = [];
-        let songName;
         let i = 1;
 
         queueData.data.queue.forEach((item) => {
             songData.data.songs.forEach((song) => {
                 if (item === song._id) {
-                    songName = `${i}. ${song.name}`;
-                    songList.push(songName);
+                    songList.push(`${i}. ${song.name}`);
                 }
             });
 
@@ -46,7 +48,7 @@ module.exports = {
             embeds: [
                 new EmbedBuilder().setTitle("Song Queue")
                                   .setColor(Colors.Blue)
-                                  .setDescription("Now Playing: " currentSongName + "\n    " + songList.join("\n   "))
+                                  .setDescription("Now Playing: " + currentSongName + "\n    " + songList.join("\n   "))
                                   .setFooter({ text: "noted-mc v1.0.0" })
             ],
             ephemeral: true
