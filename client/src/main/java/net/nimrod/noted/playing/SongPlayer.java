@@ -53,26 +53,26 @@ public class SongPlayer {
     public void onTick() {
         if (!active)
             return;
+
+        if (songLoaderThread == null) {
+            songLoaderThread = new SongLoaderThread();
+            songLoaderThread.start();
+        } 
+
+        if (!songLoaderThread.isAlive()) {
+            if (songLoaderThread.exception != null) {
+                LogUtils.chatLog("Failed to load song: " + songLoaderThread.exception.getMessage());
+            } else {
+                if (currentSong == null) {
+                    currentSong = songLoaderThread.song; 
+                    LogUtils.chatLog("Loaded song: " + currentSong.getName());
+
+                    currentState = State.STAGING;
+                }
+            }
+        }
         
         switch (currentState) {
-            case WAITING:
-                if (songLoaderThread == null) {
-                    songLoaderThread = new SongLoaderThread();
-                    songLoaderThread.start();
-                } 
-
-                if (!songLoaderThread.isAlive()) {
-                    if (songLoaderThread.exception != null) {
-                        LogUtils.chatLog("Failed to load song: " + songLoaderThread.exception.getMessage());
-                    } else {
-                        if (currentSong == null) {
-                            currentSong = songLoaderThread.song; 
-                            LogUtils.chatLog("Loaded song: " + currentSong.getName());
-
-                            currentState = State.STAGING;
-                        }
-                    }
-                }
             case STAGING:
                 /* center player */
                 mc.player.setPosition(MathHelper.floor(mc.player.getX()) + 0.5, mc.player.getY(), MathHelper.floor(mc.player.getZ()) + 0.5);
@@ -109,9 +109,9 @@ public class SongPlayer {
     }
 
     public void reset() {
-        currentState = State.WAITING;
         songLoaderThread = null;
         currentSong = null;
+        currentState = State.WAITING;
     } 
 
     private void scanNoteBlockStage() {
