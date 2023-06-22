@@ -54,25 +54,25 @@ public class SongPlayer {
         if (!active)
             return;
         
-        switch (currentState) {
-            case WAITING:
-                if (songLoaderThread == null) {
-                    songLoaderThread = new SongLoaderThread();
-                    songLoaderThread.start();
-                } 
+        if (songLoaderThread == null) {
+            songLoaderThread = new SongLoaderThread();
+            songLoaderThread.start();
+        } 
 
-                if (!songLoaderThread.isAlive()) {
-                    if (songLoaderThread.exception != null) {
-                        LogUtils.chatLog("Failed to load song: " + songLoaderThread.exception.getMessage());
-                    } else {
-                        if (currentSong == null) {
-                            currentSong = songLoaderThread.song; 
-                            LogUtils.chatLog("Loaded song: " + currentSong.getName());
+        if (!songLoaderThread.isAlive()) {
+            if (songLoaderThread.exception != null) {
+                LogUtils.chatLog("Failed to load song: " + songLoaderThread.exception.getMessage());
+            } else {
+                if (currentSong == null) {
+                    currentSong = songLoaderThread.song; 
+                    LogUtils.chatLog("Loaded song: " + currentSong.getName());
 
-                            currentState = State.STAGING;
-                        }
-                    }
+                    currentState = State.STAGING;
                 }
+            }
+        }
+
+        switch (currentState) {
             case STAGING:
                 /* center player */
                 mc.player.setPosition(MathHelper.floor(mc.player.getX()) + 0.5, mc.player.getY(), MathHelper.floor(mc.player.getZ()) + 0.5);
