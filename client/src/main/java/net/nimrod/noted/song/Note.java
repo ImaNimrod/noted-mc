@@ -26,6 +26,20 @@ public class Note implements Comparable<Note> {
         this.time = time;
     }
 
+    @Override
+    public int hashCode() {
+        return (noteId % 25) * 31 + (noteId / 25);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Note))
+            return false;
+
+        Note other = (Note) obj;
+        return noteId == other.noteId; 
+    }
+
 	@Override
 	public int compareTo(Note other) {
 		if (time < other.getTime())
