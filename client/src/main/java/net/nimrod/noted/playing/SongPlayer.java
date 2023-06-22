@@ -20,7 +20,6 @@ import net.nimrod.noted.util.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -77,10 +76,6 @@ public class SongPlayer {
                 /* center player */
                 mc.player.setPosition(MathHelper.floor(mc.player.getX()) + 0.5, mc.player.getY(), MathHelper.floor(mc.player.getZ()) + 0.5);
                 mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
-
-                /* look straight ahead */
-                mc.player.setYaw(-90.0f);
-                mc.player.setPitch(0.0f);
 
                 LogUtils.chatLog("Preparing noteblock stage...");
 
@@ -143,10 +138,12 @@ public class SongPlayer {
         pitchMap.clear();
 
         /* define the requirements (distinct notes) of the song */
-        List<Note> songRequirements = new ArrayList<>();
-        currentSong.getNotes().stream().distinct().forEach(songRequirements::add);
+        List<Note> requirements = new ArrayList<>();
+        currentSong.getNotes().stream().distinct().forEach(requirements::add);
 
-        for (Note note : songRequirements) {
+        LogUtils.chatLog(String.valueOf(requirements.size()));
+
+        for (Note note : requirements) {
             for (BlockPos blockPos : noteBlockStage) {
                 if (pitchMap.containsKey(blockPos))
                     continue;

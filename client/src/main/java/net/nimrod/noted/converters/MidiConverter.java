@@ -92,7 +92,9 @@ public class MidiConverter {
                             microTime += (mpq / tpq) * deltaTick;
 
                             Note note = null;
-                            if (sm.getChannel() != 9)
+                            if (sm.getChannel() == 9)
+                                note = getMidiPercussionNote(instrumentIds[sm.getData1()], microTime);
+                            else 
                                 note = getMidiInstrumentNote(instrumentIds[sm.getChannel()], sm.getData1(), microTime);
 
                             if (note != null)
