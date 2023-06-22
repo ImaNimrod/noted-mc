@@ -1,4 +1,4 @@
-package net.nimrod.noted.utils;
+package net.nimrod.noted.util;
 
 import com.google.gson.*;
 import net.nimrod.noted.Noted;

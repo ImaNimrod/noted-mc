@@ -2,7 +2,7 @@ package net.nimrod.noted.converters;
 
 import net.nimrod.noted.Noted;
 import net.nimrod.noted.song.*;
-import net.nimrod.noted.utils.LogUtils;
+import net.nimrod.noted.util.LogUtils;
 
 import java.io.*;
 import java.util.ArrayList;

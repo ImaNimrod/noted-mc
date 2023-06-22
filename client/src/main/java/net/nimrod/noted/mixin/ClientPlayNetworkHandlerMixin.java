@@ -13,14 +13,8 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
     private void onChatMessage(String message, CallbackInfo ci) {
-        if (message.startsWith("%")) {
-            if (message.substring(1).equalsIgnoreCase("activate")) {
-                Noted.INSTANCE.songPlayer.setActive(true);
-            } else if (message.substring(1).equalsIgnoreCase("stop")) {
-                Noted.INSTANCE.songPlayer.setActive(false);
-                Noted.INSTANCE.songPlayer.reset();
-            }
-
+        if (message.startsWith(Noted.INSTANCE.commandManager.getPrefix())) {
+            Noted.INSTANCE.commandManager.runCommand(message.substring(Noted.INSTANCE.commandManager.getPrefix().length()));
             ci.cancel();
         }
     }

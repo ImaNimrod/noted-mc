@@ -1,4 +1,4 @@
-package net.nimrod.noted.utils;
+package net.nimrod.noted.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;

@@ -1,4 +1,4 @@
-package net.nimrod.noted.utils;
+package net.nimrod.noted.util;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;

@@ -16,7 +16,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.nimrod.noted.song.*;
-import net.nimrod.noted.utils.*;
+import net.nimrod.noted.util.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ import java.util.Map.Entry;
 
 public class SongPlayer {
 
-    private boolean active = false;                     /* is song player playing */ 
-    private Song currentSong = null;                    /* currently playing song structure */
-    private String currentSongName = null;              /* currently playing song name */
+    public boolean active = false;                      /* is song player playing */ 
+    public boolean paused = false;                      /* is the current song paused */
+    public Song currentSong = null;                     /* currently playing song structure */
 
     private State currentState = State.WAITING;         /* the current state of the bot */
     private SongLoaderThread songLoaderThread = null;   /* seperate execution thread for fetching songs from api */
@@ -41,22 +41,6 @@ public class SongPlayer {
     private int tuneNoteBlockDelayCount = 0;
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
-
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public Song getSong() {
-        return currentSong;
-    }
-
-    public String getSongName() {
-        return currentSongName; 
-    }
 
     public void onWorldRender(MatrixStack matrixStack) {
         if (currentState == State.WAITING)
@@ -81,8 +65,7 @@ public class SongPlayer {
             } else {
                 if (currentSong == null) {
                     currentSong = songLoaderThread.song; 
-                    currentSongName = songLoaderThread.songName;
-                    LogUtils.chatLog("Loaded song: " + currentSongName);
+                    LogUtils.chatLog("Loaded song: " + currentSong.getName());
 
                     currentState = State.STAGING;
                 }
@@ -129,7 +112,6 @@ public class SongPlayer {
         currentState = State.WAITING;
         songLoaderThread = null;
         currentSong = null;
-        currentSongName = null;
     } 
 
     private void scanNoteBlockStage() {
@@ -212,6 +194,11 @@ public class SongPlayer {
     }
 
     private void playSongTick() {
+        if (paused) {
+            currentSong.pause();
+            return;
+        }
+
         currentSong.play(); 
         currentSong.advanceCurrentTime();
 
