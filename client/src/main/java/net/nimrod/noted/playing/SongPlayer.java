@@ -31,7 +31,7 @@ public class SongPlayer {
     public boolean paused = false;                      /* is the current song paused */
     public Song currentSong = null;                     /* currently playing song structure */
 
-    private State currentState = State.WAITING;         /* the current state of the bot */
+    private State state = State.WAITING;         /* the current state of the bot */
     private SongLoaderThread songLoaderThread = null;   /* seperate execution thread for fetching songs from api */
 
     private final List<BlockPos> noteBlockStage = new ArrayList<>();        /* holds the block positions of playable noteblocks */
@@ -43,7 +43,7 @@ public class SongPlayer {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public void onWorldRender(MatrixStack matrixStack) {
-        if (currentState == State.WAITING)
+        if (state == State.WAITING)
             return;
 
         for (BlockPos noteBlock : noteBlockStage)
@@ -62,42 +62,39 @@ public class SongPlayer {
         if (!songLoaderThread.isAlive()) {
             if (songLoaderThread.exception != null) {
                 LogUtils.chatLog("Failed to load song: " + songLoaderThread.exception.getMessage());
+                state = State.ERROR;
             } else {
                 if (currentSong == null) {
                     currentSong = songLoaderThread.song; 
                     LogUtils.chatLog("Loaded song: " + currentSong.getName());
 
-                    currentState = State.STAGING;
+                    state = State.STAGING;
                 }
             }
         }
 
-        switch (currentState) {
+        switch (state) {
             case STAGING:
                 /* center player */
                 mc.player.setPosition(MathHelper.floor(mc.player.getX()) + 0.5, mc.player.getY(), MathHelper.floor(mc.player.getZ()) + 0.5);
                 mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
-
-                /* look straight ahead */
-                mc.player.setYaw(-90.0f);
-                mc.player.setPitch(0.0f);
 
                 LogUtils.chatLog("Preparing noteblock stage...");
 
                 scanNoteBlockStage();
                 if (noteBlockStage.size() == 0) {
                     LogUtils.chatLog("Could not find any noteblocks within range");
-                    currentState = State.ERROR;
+                    state = State.ERROR;
                 }
 
                 setupPitchMap();
                 if (pitchMap.isEmpty()) {
                     LogUtils.chatLog("Could not create pitch to noteblock mapping");
-                    currentState = State.ERROR;
+                    state = State.ERROR;
                 }
 
                 LogUtils.chatLog("Tuning noteblocks...");
-                currentState = State.TUNING;
+                state = State.TUNING;
                 break;
             case TUNING:
                 tuneNoteBlocks();
@@ -109,7 +106,7 @@ public class SongPlayer {
     }
 
     public void reset() {
-        currentState = State.WAITING;
+        state = State.WAITING;
         songLoaderThread = null;
         currentSong = null;
     } 
@@ -190,7 +187,7 @@ public class SongPlayer {
         }
         
         LogUtils.chatLog("Playing song...");
-        currentState = State.PLAYING;
+        state = State.PLAYING;
     }
 
     private void playSongTick() {
