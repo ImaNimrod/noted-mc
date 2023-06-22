@@ -2,8 +2,8 @@ package net.nimrod.noted.song;
 
 public class Note implements Comparable<Note> {
 
-    private final int noteId;
-    private final long time; 
+    private int noteId;
+    private long time; 
 
     public Note(int noteId, long time) {
         this.noteId = noteId;
@@ -14,22 +14,16 @@ public class Note implements Comparable<Note> {
         return noteId;
     }
 
+    public void setNoteId(int noteId) {
+        this.noteId = noteId;
+    }
+
     public long getTime() {
         return time;
     }
 
-    @Override
-    public int hashCode() {
-        return (noteId % 25) * 31 + (noteId / 25);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Note))
-            return false;
-
-        Note other = (Note) obj;
-        return (noteId / 25) == (other.noteId / 25) && (noteId % 25) == (other.noteId % 25);
+    public void setTime(long time) {
+        this.time = time;
     }
 
 	@Override
