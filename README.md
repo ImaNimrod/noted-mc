@@ -40,15 +40,15 @@ functionality:
 - queue
 
 #### queue
-The queue route implements the song queue. a GET from ```/queue``` returns a json array of the songs in the queue and
-a GET from ```/queue/next``` returns the id of the next song and remove that song from the queue, 
-while a POST to ```/queue/[valid song id here]``` will add that song to the back of the queue.
+The queue route implements the song queue. a GET from `/queue` returns a json array of the songs in the queue and
+a GET from `/queue/next` returns the id of the next song and remove that song from the queue, 
+while a POST to `/queue/[valid song id here]` will add that song to the back of the queue.
 
 #### songs
-The songs route implements all functionality relating to songs themselves. An HTTP GET from ```/songs``` returns a JSON array of all songs stored in the database.
-Each entry consists of an ```_id```, ```name```, and ```datePosted```. An HTTP GET from ```/songs/[valid song _id here]``` returns the MIDI file data for the given song.
-To upload a song, make an HTTP POST request to ```/songs``` with form data body containing ```name=[song name here]``` and ```file=@"[path to midi file]```. To remove a song from the database,
-HTTP DELETE from ```/songs/[valid song _id here]```.
+The songs route implements all functionality relating to songs themselves. An HTTP GET from `/songs` returns a JSON array of all songs stored in the database.
+Each entry consists of an `_id`, `name`, and `datePosted`. An HTTP GET from `/songs/[valid song _id here]` returns the MIDI file data for the given song.
+To upload a song, make an HTTP POST request to `/songs` with form data body containing `name=[song name here]` and `file=@"[path to midi file]`. To remove a song from the database,
+HTTP DELETE from `/songs/[valid song _id here]`.
 
 ### Minecraft Client layer
 TODO
@@ -62,7 +62,7 @@ client maps the noteblocks in its enviroment, tunes, and then plays them ([SongP
     - Create a MongoDB instance using something like [MongoDB Atlas](https://www.mongodb.com/atlas/database). Use the free tier (M0), create a new project, create a cluster
         for that project, and then create a database and collection in that cluster. This is where song schemas will be stored.
     - If you want the application to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
-    - Create a ```.env``` file in the [api](/api) directory; inside of it, create the following enviroment variables:
+    - Create a `.env` file in the [api](/api) directory; inside of it, create the following enviroment variables:
         - `MONGODB_USER = [your MongoDB account username]`
         - `MONGODB_PASSWORD = [your MongoDB account password]`
         - `MONGODB_CLUSTER = [name of your MongoDB cluster]`
@@ -73,8 +73,8 @@ client maps the noteblocks in its enviroment, tunes, and then plays them ([SongP
 2. Deploy the Discord Bot layer:
     - Create a new [Discord application](https://discord.com/developers/applications). Give it a sensible name, description, etc.
     - Create and configure the application's bot with a name, icon, etc. Copy the token somewhere for later use.
-    - Ensure that under "Privileged Gateway Intents", all intent options are enabled and that under "Bot Permissions", "Send Messages" is enabled. Save your changes.
-    - Under OAuth2->URL Generator, select the scopes `applications.commands` and `bot`.
+    - Enable all options under "Privileged Gateway Intents".
+    - Under OAuth2->URL Generator, select the scopes `applications.commands` and `bot`. Under "Bot Permissions", enable "Send Messages".
     - Copy the generated URL and paste it into a text channel of the Discord server you want to add the bot to. Confirm that the configuration is correct, and add it to your server.
     - Again, if you want the bot to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
     - Create a `.env` file in the [discord-bot](/discord-bot) directory; inside of it, create the following enviroment variables:
