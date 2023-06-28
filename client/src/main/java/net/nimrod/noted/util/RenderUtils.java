@@ -20,61 +20,63 @@ public class RenderUtils {
     }
 
     public static void drawBoxOutline(MatrixStack matrixStack, Box box, Color color) {
+        float[] colorFloats = getColorFloats();
+        RenderSystem.setShaderColor(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f);
+		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
         matrixStack.push();
         translateMatrixStack(matrixStack);
+		
+		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
+		RenderSystem.setShader(GameRenderer::getPositionProgram);
 
-        float[] colorFloats = getColorFloats(color);
-
-        Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-        BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().getBuffer();
-
-        bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION);
         {
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.minY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.minY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.minZ).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.maxX, (float) box.maxY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).next();
 
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
-            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).color(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.maxZ).next();
+            bufferBuilder.vertex(matrix, (float) box.minX, (float) box.maxY, (float) box.minZ).next();
         }
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-
+		tessellator.draw();
+		
         matrixStack.pop();
 
+		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_BLEND);
     }
