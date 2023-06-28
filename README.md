@@ -79,7 +79,7 @@ I'm not, but don't take my word and just read the damn source code first. Once y
     - Select your driver as "Node.js" and copy the connection string somewhere for later use. Make sure you add the IP address of the computer/server you are going to connect to the database from to the access list.
     - If you want the application to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
     - Create a `.env` file in the [api](/api) directory; inside of it, create the following enviroment variables:
-        - `MONGODB_URI=[the connection string you saved from earlier. Replace <password> with your user's password]`
+        - `MONGODB_URI=[the connection string you saved from earlier. Replace <password> with your user's password. Right after mongodb.net/, put the name of your database]`
         - `PORT=[the port you want the API to run on (default is 3000)]`
     - Run `npm i` to install dependencies.
     - Run `node src/index.js`, and your application will start running. If an error occurs, check that your MongoDB connection string is correct.

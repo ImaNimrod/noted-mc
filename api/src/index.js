@@ -10,12 +10,10 @@ const port = process.env.PORT || 3000;
 const queueRoute = require("./routes/queue.js");
 const songsRoute = require("./routes/songs.js");
 
-mongoose.connect(
-        ${process.env.MONGODB_URI}
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }
-);
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 
 app.use(express.json());
 
