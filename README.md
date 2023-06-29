@@ -91,7 +91,7 @@ I'm not, but don't take my word and just read the damn source code first. Once y
     - Copy the generated URL and paste it into a text channel of the Discord server you want to add the bot to. Confirm that the configuration is correct, and add it to your server.
     - Again, if you want the bot to be running 24/7, you will need to deploy it on a server, which means you will need to run the following steps on said server.
     - Create a `.env` file in the [discord-bot](/discord-bot) directory; inside of it, create the following enviroment variables:
-        - `API_URL=[the url/ip to the server running the API instance that we set up earlier]`
+        - `API_URL=[the URL/IP to the server running the API instance that we set up earlier]`
         - `DISCORD_TOKEN=[the bot's token which you copied earlier]`
         - `DISCORD_CLIENT_ID=[the bot's client id from discord]`
         - `DISCORD_GUILD_ID=[your server's guild id]`
@@ -99,6 +99,7 @@ I'm not, but don't take my word and just read the damn source code first. Once y
     - Run `node src/index.js`, and you will see the bot connect and start running. You can now test it in the Discord server.
 3. Build and run the Minecraft Client:
     - We are going to build the client from source so, you need Java as well as the JDK (version >= 17).
+    - Open the file [ApiUtils.java](/client/src/main/java/net/nimrod/noted/util/ApiUtils.java) and change the value of the variable `apiURL` to the URL/IP of the server running your API instance.
     - Open a terminal/command prompt in the [client](/client) directory.
     - Run, Linux/OSX: `./gradlew build` or Windows: `./gradlew.bat build`. This might take a while, but it should finish without any errors.
     - Copy the file `noted-1.0.0.jar` from `build/libs/` to the `mods` directory of wherever your Minecraft Client folder is. You will also need `fabric-api`.
