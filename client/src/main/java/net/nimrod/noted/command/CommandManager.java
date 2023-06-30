@@ -9,7 +9,7 @@ import java.util.List;
 
 public class CommandManager {
 
-    private final String prefix = ".";
+    private final String prefix = "!";
 
     private List<Command> commands = new ArrayList<>();
 

@@ -20,7 +20,7 @@ public class RenderUtils {
     }
 
     public static void drawBoxOutline(MatrixStack matrixStack, Box box, Color color) {
-        float[] colorFloats = getColorFloats();
+        float[] colorFloats = getColorFloats(color);
         RenderSystem.setShaderColor(colorFloats[0], colorFloats[1], colorFloats[2], 1.0f);
 		
 		GL11.glEnable(GL11.GL_BLEND);

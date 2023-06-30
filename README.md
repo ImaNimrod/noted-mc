@@ -63,7 +63,7 @@ the client downloads that song from the API's `/songs` route into memory. Once t
 for noteblocks. It takes into account both the unique pitches and instruments of every song, and maps them to the surrounding noteblocks as
 best as possible. The client then tunes the noteblocks to the required pitches and begins playing. When the client finishes playing a song,
 it automatically goes back to polling the API for the next one. The client also features a small command interface that allows one to do
-things like `.skip` a song, `.pause` a song, `.toggle` the client on or off, etc. Use `.help` for a list of commands,
+things like `!skip` a song, `!pause` a song, `!toggle` the client on or off, etc. Use `!help` for a list of commands,
 as well as details about a particular command.
 
 ## How to actually use this
