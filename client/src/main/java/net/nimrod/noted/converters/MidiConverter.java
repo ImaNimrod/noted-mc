@@ -18,7 +18,6 @@ public class MidiConverter {
     private static final int SET_INSTRUMENT = 0xC0;
 
 	public static Song getSongFromBytes(byte[] bytes, String name) throws InvalidMidiDataException, IOException {
-        LogUtils.consoleLog(Integer.toString(bytes[0]));
 		Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(bytes));
 		return getSong(sequence, name);
 	}

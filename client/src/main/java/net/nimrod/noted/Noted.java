@@ -1,7 +1,8 @@
 package net.nimrod.noted;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.nimrod.noted.command.CommandManager;
 import net.nimrod.noted.playing.SongPlayer;
@@ -40,11 +41,21 @@ public class Noted implements ModInitializer {
     }
 
     public void onKey(int key, int action) {
-        if (key == GLFW.GLFW_KEY_Z && action == GLFW.GLFW_PRESS) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen == null && mc.getOverlay() == null && action == GLFW.GLFW_RELEASE
+            && commandManager.getPrefix().equals(GLFW.glfwGetKeyName(key, 0)))
+        {
+            mc.setScreen(new ChatScreen(commandManager.getPrefix()));
+            return;
+        }
+
+        if (key == GLFW.GLFW_KEY_O && action == GLFW.GLFW_PRESS) {
             songPlayer.active = !songPlayer.active;
 
             if (!songPlayer.active)
                 songPlayer.reset();
+        } else if (key == GLFW.GLFW_KEY_P && action == GLFW.GLFW_PRESS) {
+            songPlayer.paused = !songPlayer.paused;
         }
     }
 
