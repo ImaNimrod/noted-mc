@@ -9,13 +9,14 @@ import java.util.List;
 
 public class CommandManager {
 
-    private final String prefix = "!";
+    private final String prefix = ".";
 
     private List<Command> commands = new ArrayList<>();
 
     public CommandManager() {
         commands.add(new Help());
         commands.add(new Info());
+        commands.add(new Loop());
         commands.add(new Pause());
         commands.add(new Skip());
         commands.add(new Toggle());

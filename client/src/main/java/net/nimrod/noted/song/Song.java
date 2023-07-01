@@ -53,6 +53,11 @@ public class Song {
         }
     }
 
+    public void loop() {
+        startTime = System.currentTimeMillis() - currentTime;
+        position = 0;
+    }
+
     public boolean finished() {
         return currentTime > length;
     }

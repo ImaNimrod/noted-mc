@@ -42,20 +42,18 @@ public class Noted implements ModInitializer {
 
     public void onKey(int key, int action) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.currentScreen == null && mc.getOverlay() == null && action == GLFW.GLFW_RELEASE
-            && commandManager.getPrefix().equals(GLFW.glfwGetKeyName(key, 0)))
-        {
-            mc.setScreen(new ChatScreen(commandManager.getPrefix()));
-            return;
-        }
 
-        if (key == GLFW.GLFW_KEY_O && action == GLFW.GLFW_PRESS) {
-            songPlayer.active = !songPlayer.active;
-
-            if (!songPlayer.active)
-                songPlayer.reset();
-        } else if (key == GLFW.GLFW_KEY_P && action == GLFW.GLFW_PRESS) {
-            songPlayer.paused = !songPlayer.paused;
+        if (mc.currentScreen == null && mc.getOverlay() == null) {
+            if (commandManager.getPrefix().equals(GLFW.glfwGetKeyName(key, 0)) && action == GLFW.GLFW_RELEASE) {
+                mc.setScreen(new ChatScreen(commandManager.getPrefix()));
+                return;
+            } else if (key == GLFW.GLFW_KEY_O && action == GLFW.GLFW_PRESS) {
+                songPlayer.toggleActive();
+            } else if (key == GLFW.GLFW_KEY_P && action == GLFW.GLFW_PRESS) {
+                songPlayer.togglePaused();
+            } else if (key == GLFW.GLFW_KEY_L && action == GLFW.GLFW_PRESS) {
+                songPlayer.toggleLooping();
+            }
         }
     }
 

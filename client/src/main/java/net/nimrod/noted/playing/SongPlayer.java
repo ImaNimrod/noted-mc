@@ -20,7 +20,6 @@ import net.nimrod.noted.util.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -29,9 +28,11 @@ public class SongPlayer {
 
     public boolean active = false;                      /* is song player playing */ 
     public boolean paused = false;                      /* is the current song paused */
+    public boolean looping = false;                     /* is the current song looping */
+
     public Song currentSong = null;                     /* currently playing song structure */
 
-    private State state = State.WAITING;         /* the current state of the bot */
+    private State state = State.WAITING;                /* the current state of the bot */
     private SongLoaderThread songLoaderThread = null;   /* seperate execution thread for fetching songs from api */
 
     private final List<BlockPos> noteBlockStage = new ArrayList<>();        /* holds the block positions of playable noteblocks */
@@ -41,6 +42,34 @@ public class SongPlayer {
     private int tuneNoteBlockDelayCount = 0;
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
+
+    public void toggleActive() {
+        active = !active;
+        if (!active)
+            reset();
+
+        LogUtils.chatLog("Toggled noted-client " + (active ? "§aon§f" : "§coff§f"));
+    }
+
+    public void togglePaused() {
+        if (currentSong == null) {
+            LogUtils.chatLog("No song playing");
+            return;
+        }
+
+        paused = !paused;
+        LogUtils.chatLog("Song " + (paused ? "§cpaused§f" : "§aunpaused§f"));
+    }
+
+    public void toggleLooping() {
+        if (currentSong == null) {
+            LogUtils.chatLog("No song playing");
+            return;
+        }
+
+        looping = !looping;
+        LogUtils.chatLog("Toggled song looping " + (looping ? "§aon§f" : "§coff§f"));
+    }
 
     public void onWorldRender(MatrixStack matrixStack) {
         if (state == State.WAITING)
@@ -106,9 +135,11 @@ public class SongPlayer {
     }
 
     public void reset() {
+        paused = false;
+        looping = false;
+        currentSong = null;
         state = State.WAITING;
         songLoaderThread = null;
-        currentSong = null;
     } 
 
     private void scanNoteBlockStage() {
@@ -210,8 +241,14 @@ public class SongPlayer {
             }
         }
 
-        if (currentSong.finished())
+        if (currentSong.finished()) {
+            if (looping) {
+                currentSong.loop();
+                return;
+            }
+
             reset();
+        }
     }
 
     private void playNoteBlock(BlockPos blockPos) {

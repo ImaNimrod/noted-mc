@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ApiUtils {
 
-    private static final String apiURL = "URL/IP of your API instance here";
+    private static final String apiURL = "Your API URL/IP here";
 
     public static List<JsonElement> getSongs() {
         String res = apiGET("/songs");
