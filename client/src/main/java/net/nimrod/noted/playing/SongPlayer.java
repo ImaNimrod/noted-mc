@@ -28,7 +28,6 @@ public class SongPlayer {
 
     public boolean active = false;                      /* is song player playing */ 
     public boolean paused = false;                      /* is the current song paused */
-    public boolean looping = false;                     /* is the current song looping */
 
     public Song currentSong = null;                     /* currently playing song structure */
 
@@ -59,16 +58,6 @@ public class SongPlayer {
 
         paused = !paused;
         LogUtils.chatLog("Song " + (paused ? "§cpaused§f" : "§aunpaused§f"));
-    }
-
-    public void toggleLooping() {
-        if (currentSong == null) {
-            LogUtils.chatLog("No song playing");
-            return;
-        }
-
-        looping = !looping;
-        LogUtils.chatLog("Toggled song looping " + (looping ? "§aon§f" : "§coff§f"));
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
@@ -136,7 +125,6 @@ public class SongPlayer {
 
     public void reset() {
         paused = false;
-        looping = false;
         currentSong = null;
         state = State.WAITING;
         songLoaderThread = null;
@@ -241,14 +229,8 @@ public class SongPlayer {
             }
         }
 
-        if (currentSong.finished()) {
-            if (looping) {
-                currentSong.loop();
-                return;
-            }
-
+        if (currentSong.finished())
             reset();
-        }
     }
 
     private void playNoteBlock(BlockPos blockPos) {

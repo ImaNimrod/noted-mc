@@ -6,8 +6,7 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.nimrod.noted.command.CommandManager;
 import net.nimrod.noted.playing.SongPlayer;
-import net.nimrod.noted.util.LogUtils;
-import net.nimrod.noted.util.RenderUtils;
+import net.nimrod.noted.util.*;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.Color;
@@ -32,8 +31,11 @@ public class Noted implements ModInitializer {
         RenderUtils.drawString(matrixStack, NAME + " v" + VERSION + " | " + (songPlayer.active ? "active" : "inactive"),
                                4, 4, Color.WHITE);
 
-        if (songPlayer.active && songPlayer.currentSong != null)
+        if (songPlayer.active && songPlayer.currentSong != null) {
             RenderUtils.drawString(matrixStack, "Now Playing: " + songPlayer.currentSong.getName(), 4, 16, Color.WHITE);
+            RenderUtils.drawString(matrixStack, TimeUtils.formatTime(songPlayer.currentSong.getCurrentTime()) + "/" +
+                                                TimeUtils.formatTime(songPlayer.currentSong.getLength()), 4, 28, Color.WHITE);
+        }
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
@@ -51,8 +53,6 @@ public class Noted implements ModInitializer {
                 songPlayer.toggleActive();
             } else if (key == GLFW.GLFW_KEY_P && action == GLFW.GLFW_PRESS) {
                 songPlayer.togglePaused();
-            } else if (key == GLFW.GLFW_KEY_L && action == GLFW.GLFW_PRESS) {
-                songPlayer.toggleLooping();
             }
         }
     }

@@ -27,6 +27,10 @@ public class Song {
         return name;
     }
     
+    public long getCurrentTime() {
+        return currentTime;
+    }
+
     public long getLength() {
         return length;
     }
@@ -51,11 +55,6 @@ public class Song {
             paused = true;
             advanceCurrentTime();
         }
-    }
-
-    public void loop() {
-        startTime = System.currentTimeMillis() - currentTime;
-        position = 0;
     }
 
     public boolean finished() {

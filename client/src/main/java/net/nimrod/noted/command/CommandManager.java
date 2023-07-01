@@ -16,7 +16,6 @@ public class CommandManager {
     public CommandManager() {
         commands.add(new Help());
         commands.add(new Info());
-        commands.add(new Loop());
         commands.add(new Pause());
         commands.add(new Skip());
         commands.add(new Toggle());
