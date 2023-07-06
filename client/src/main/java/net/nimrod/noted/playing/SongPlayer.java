@@ -81,22 +81,26 @@ public class SongPlayer {
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
-        if (state != State.PLAYING) {
-            for (BlockPos noteBlock : noteBlockStage)
-                RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
-        } else {
-            for (BlockPos noteBlock : noteBlockStage) {
-                if (playedNoteBlocks.contains(noteBlock)) {
-                    RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
-                } else {
-                    Integer pitch = pitchMap.get(noteBlock);
-                    if (pitch == null)
-                        continue;
+        switch (state) {
+            case STAGING:
+            case TUNING:
+                for (BlockPos noteBlock : noteBlockStage)
+                    RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
+                break;
+            case PLAYING:
+                for (BlockPos noteBlock : noteBlockStage) {
+                    if (playedNoteBlocks.contains(noteBlock)) {
+                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+                    } else {
+                        Integer pitch = pitchMap.get(noteBlock);
+                        if (pitch == null)
+                            continue;
 
-                    if (pitch != getNoteBlockNote(noteBlock))
-                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+                        if (pitch != getNoteBlockNote(noteBlock))
+                            RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+                    }
                 }
-            }
+                break;
         }
     }
 
