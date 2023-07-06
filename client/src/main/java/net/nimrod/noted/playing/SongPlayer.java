@@ -81,24 +81,22 @@ public class SongPlayer {
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
-        switch (state) {
-            case STAGING:
-            case TUNING:
-                for (BlockPos noteBlock : noteBlockStage)
-                    RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
-            case PLAYING:
-                for (BlockPos noteBlock : noteBlockStage) {
-                    if (playedNoteBlocks.contains(noteBlock)) {
-                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
-                    } else {
-                        Integer pitch = pitchMap.get(noteBlock);
-                        if (pitch == null)
-                            continue;
+        if (state != State.PLAYING) {
+            for (BlockPos noteBlock : noteBlockStage)
+                RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
+        } else {
+            for (BlockPos noteBlock : noteBlockStage) {
+                if (playedNoteBlocks.contains(noteBlock)) {
+                    RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+                } else {
+                    Integer pitch = pitchMap.get(noteBlock);
+                    if (pitch == null)
+                        continue;
 
-                        if (pitch != getNoteBlockNote(noteBlock))
-                            RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
-                    }
+                    if (pitch != getNoteBlockNote(noteBlock))
+                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
                 }
+            }
         }
     }
 
@@ -137,14 +135,14 @@ public class SongPlayer {
                 if (noteBlockStage.size() == 0) {
                     LogUtils.chatLog("Could not find any noteblocks within range");
                     state = State.ERROR;
-                    return;
+                    break;
                 }
 
                 setupPitchMap();
                 if (pitchMap.isEmpty()) {
                     LogUtils.chatLog("Could not create pitch to noteblock mapping");
                     state = State.ERROR;
-                    return;
+                    break;
                 }
 
                 LogUtils.chatLog("Tuning noteblocks...");
@@ -155,6 +153,9 @@ public class SongPlayer {
                 break; 
             case PLAYING:
                 playSongTick();
+                break;
+            case ERROR:
+                reset();
                 break;
         }
     }
