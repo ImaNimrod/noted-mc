@@ -9,7 +9,6 @@
       "InGameHudMixin",
       "KeyboardMixin",
       "LightmapTextureManagerMixin",
-      "MinecraftClientMixin",
       "WorldRendererMixin"
   ],
   "client": [
