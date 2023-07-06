@@ -40,9 +40,6 @@ public class SongPlayer {
     private final int tuneNoteBlockDelay = 5;           /* the time between tuning individual noteblocks (in ticks) */ 
     private int tuneNoteBlockDelayCount = 0;
 
-    private final int retuneDelay = 10;                 /* the time between rechecking noteblock tuning */
-    private int retuneDelayCount = 0;
-
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public void toggleActive() {
@@ -84,20 +81,24 @@ public class SongPlayer {
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
-        if (state != State.PLAYING)
-            return;
+        switch (state) {
+            case STAGING:
+            case TUNING:
+                for (BlockPos noteBlock : noteBlockStage)
+                    RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
+            case PLAYING:
+                for (BlockPos noteBlock : noteBlockStage) {
+                    if (playedNoteBlocks.contains(noteBlock)) {
+                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+                    } else {
+                        Integer pitch = pitchMap.get(noteBlock);
+                        if (pitch == null)
+                            continue;
 
-        for (BlockPos noteBlock : noteBlockStage) {
-            if (playedNoteBlocks.contains(noteBlock)) {
-                RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
-            } else {
-                Integer pitch = pitchMap.get(noteBlock);
-                if (pitch == null)
-                    continue;
-                
-                if (pitch != getNoteBlockNote(noteBlock))
-                    RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
-            }
+                        if (pitch != getNoteBlockNote(noteBlock))
+                            RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+                    }
+                }
         }
     }
 
