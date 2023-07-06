@@ -6,10 +6,9 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.nimrod.noted.command.CommandManager;
 import net.nimrod.noted.playing.SongPlayer;
-import net.nimrod.noted.util.*;
+import net.nimrod.noted.util.LogUtils;
+import net.nimrod.noted.util.RenderUtils;
 import org.lwjgl.glfw.GLFW;
-
-import java.awt.Color;
 
 public class Noted implements ModInitializer {
 
@@ -22,43 +21,37 @@ public class Noted implements ModInitializer {
     public final CommandManager commandManager = new CommandManager();
     public final SongPlayer songPlayer = new SongPlayer();
 
+    private final MinecraftClient mc = MinecraftClient.getInstance();
+
 	@Override
 	public void onInitialize() {
 		LogUtils.consoleLog("Initializing " + NAME + " v" + VERSION + " created by " + AUTHOR);
 	}
 
     public void onHudRender(MatrixStack matrixStack, float tickDelta) {
-        RenderUtils.drawString(matrixStack, NAME + " v" + VERSION + " | " + (songPlayer.active ? "active" : "inactive"),
-                               4, 4, Color.WHITE);
-
-        if (songPlayer.active && songPlayer.currentSong != null) {
-            RenderUtils.drawString(matrixStack, "Now Playing: " + songPlayer.currentSong.getName(), 4, 16, Color.WHITE);
-            RenderUtils.drawString(matrixStack, TimeUtils.formatTime(songPlayer.currentSong.getCurrentTime()) + "/" +
-                                                TimeUtils.formatTime(songPlayer.currentSong.getLength()), 4, 28, Color.WHITE);
-        }
+        RenderUtils.drawString(matrixStack, NAME + " v" + VERSION, 4, 4, 0xffffffff);
+        songPlayer.onHudRender(matrixStack, tickDelta);
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
         songPlayer.onWorldRender(matrixStack);
     }
 
-    public void onKey(int key, int action) {
-        MinecraftClient mc = MinecraftClient.getInstance();
+    public void onTick() {
+        songPlayer.onTick(); 
+    }
 
+    public void onKey(int key, int action) {
         if (mc.currentScreen == null && mc.getOverlay() == null) {
             if (commandManager.getPrefix().equals(GLFW.glfwGetKeyName(key, 0)) && action == GLFW.GLFW_RELEASE) {
                 mc.setScreen(new ChatScreen(commandManager.getPrefix()));
                 return;
-            } else if (key == GLFW.GLFW_KEY_O && action == GLFW.GLFW_PRESS) {
+            } else if (key == GLFW.GLFW_KEY_I && action == GLFW.GLFW_PRESS) {
                 songPlayer.toggleActive();
-            } else if (key == GLFW.GLFW_KEY_P && action == GLFW.GLFW_PRESS) {
+            } else if (key == GLFW.GLFW_KEY_O && action == GLFW.GLFW_PRESS) {
                 songPlayer.togglePaused();
             }
         }
-    }
-
-    public void onTick() {
-        songPlayer.onTick(); 
     }
 
 }

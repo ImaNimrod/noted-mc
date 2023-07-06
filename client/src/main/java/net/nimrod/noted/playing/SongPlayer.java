@@ -18,7 +18,6 @@ import net.minecraft.util.math.Vec3d;
 import net.nimrod.noted.song.*;
 import net.nimrod.noted.util.*;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -35,10 +34,14 @@ public class SongPlayer {
     private SongLoaderThread songLoaderThread = null;   /* seperate execution thread for fetching songs from api */
 
     private final List<BlockPos> noteBlockStage = new ArrayList<>();        /* holds the block positions of playable noteblocks */
+    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();      /* holds the block positions of the noteblocks played during a single tick */
     private final HashMap<BlockPos, Integer> pitchMap = new HashMap<>();    /* a mapping of noteblocks to note pitches */
 
     private final int tuneNoteBlockDelay = 5;           /* the time between tuning individual noteblocks (in ticks) */ 
     private int tuneNoteBlockDelayCount = 0;
+
+    private final int retuneDelay = 10;                 /* the time between rechecking noteblock tuning */
+    private int retuneDelayCount = 0;
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -60,12 +63,42 @@ public class SongPlayer {
         LogUtils.chatLog("Song " + (paused ? "§cpaused§f" : "§aunpaused§f"));
     }
 
+    public void reset() {
+        paused = false;
+        currentSong = null;
+        state = State.WAITING;
+        songLoaderThread = null;
+    } 
+
+    public void onHudRender(MatrixStack matrixStack, float tickDelta) {
+        if (active && currentSong != null) {
+            String playingString = "Now Playing: " + currentSong.getName();
+            int playingStringX = mc.getWindow().getScaledWidth() - mc.textRenderer.getWidth(playingString) - 2;
+
+            String timeString = TimeUtils.formatTime(currentSong.getCurrentTime()) + "/" + TimeUtils.formatTime(currentSong.getLength());
+            int timeStringX = mc.getWindow().getScaledWidth() - mc.textRenderer.getWidth(timeString) - 2;
+
+            RenderUtils.drawString(matrixStack, playingString, playingStringX, 4, 0xffffff);
+            RenderUtils.drawString(matrixStack, timeString, timeStringX, 16, 0xffffff);
+        }
+    }
+
     public void onWorldRender(MatrixStack matrixStack) {
-        if (state == State.WAITING)
+        if (state != State.PLAYING)
             return;
 
-        for (BlockPos noteBlock : noteBlockStage)
-            RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), Color.WHITE);
+        for (BlockPos noteBlock : noteBlockStage) {
+            if (playedNoteBlocks.contains(noteBlock)) {
+                RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+            } else {
+                Integer pitch = pitchMap.get(noteBlock);
+                if (pitch == null)
+                    continue;
+                
+                if (pitch != getNoteBlockNote(noteBlock))
+                    RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+            }
+        }
     }
 
     public void onTick() {
@@ -103,12 +136,14 @@ public class SongPlayer {
                 if (noteBlockStage.size() == 0) {
                     LogUtils.chatLog("Could not find any noteblocks within range");
                     state = State.ERROR;
+                    return;
                 }
 
                 setupPitchMap();
                 if (pitchMap.isEmpty()) {
                     LogUtils.chatLog("Could not create pitch to noteblock mapping");
                     state = State.ERROR;
+                    return;
                 }
 
                 LogUtils.chatLog("Tuning noteblocks...");
@@ -122,13 +157,6 @@ public class SongPlayer {
                 break;
         }
     }
-
-    public void reset() {
-        paused = false;
-        currentSong = null;
-        state = State.WAITING;
-        songLoaderThread = null;
-    } 
 
     private void scanNoteBlockStage() {
         noteBlockStage.clear();  
@@ -215,6 +243,8 @@ public class SongPlayer {
             return;
         }
 
+        playedNoteBlocks.clear();
+
         currentSong.play(); 
         currentSong.advanceCurrentTime();
 
@@ -224,8 +254,10 @@ public class SongPlayer {
             Note note = currentSong.getNextNote();
 
             for (Entry<BlockPos, Integer> e : pitchMap.entrySet()) {
-                if (note.getNoteId() % 25 == getNoteBlockNote(e.getKey()))
+                if (note.getNoteId() % 25 == getNoteBlockNote(e.getKey())) {
+                    playedNoteBlocks.add(e.getKey());
                     playNoteBlock(e.getKey());
+                }
             }
         }
 

@@ -8,6 +8,8 @@
       "ClientPlayNetworkHandlerMixin",
       "InGameHudMixin",
       "KeyboardMixin",
+      "LightmapTextureManagerMixin",
+      "MinecraftClientMixin",
       "WorldRendererMixin"
   ],
   "client": [
