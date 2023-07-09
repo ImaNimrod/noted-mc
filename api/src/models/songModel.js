@@ -5,9 +5,9 @@ let songSchema = new mongoose.Schema({
     datePosted: { type: Date, required: true },
 
     file: { 
-        data: Buffer, 
-        contentType: String 
+        data: { type: Buffer, required: true },
+        contentType: { type: String, required: true },
     }
 });
 
-module.exports = mongoose.model("Song", songSchema);
+module.exports = mongoose.model("Song", songSchema, "songs");
