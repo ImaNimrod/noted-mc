@@ -209,7 +209,8 @@ public class SongPlayer {
                     .stream()
                     .filter(e -> e.getValue() == pitch)
                     .noneMatch(e -> getNoteBlockInstrument(e.getKey())
-                    .ordinal() == noteBlockInstrument)) {
+                    .ordinal() == noteBlockInstrument)) 
+                {
                     pitchMap.put(blockPos, pitch);
                     break;
                 }
