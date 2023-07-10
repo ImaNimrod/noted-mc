@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "noted",
-  "version": "1.1.0",
+  "version": "1.2.0",
 
   "name": "Noted",
   "description": "In-development noteblock player mod for Minecraft 1.19.4",
