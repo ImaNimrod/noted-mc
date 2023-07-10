@@ -139,14 +139,14 @@ public class SongPlayer {
                 if (noteBlockStage.size() == 0) {
                     LogUtils.chatLog("Could not find any noteblocks within range");
                     state = State.ERROR;
-                    break;
+                    return;
                 }
 
                 setupPitchMap();
                 if (pitchMap.isEmpty()) {
                     LogUtils.chatLog("Could not create pitch to noteblock mapping");
                     state = State.ERROR;
-                    break;
+                    return;
                 }
 
                 LogUtils.chatLog("Tuning noteblocks...");
@@ -159,7 +159,7 @@ public class SongPlayer {
                 playSongTick();
                 break;
             case ERROR:
-                reset();
+                toggleActive();
                 break;
         }
     }
