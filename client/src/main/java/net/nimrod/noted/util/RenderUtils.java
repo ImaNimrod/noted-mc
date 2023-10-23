@@ -15,12 +15,7 @@ public class RenderUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public static void drawString(DrawContext context, String text, int x, int y, int color) {
-		MatrixStack matrixStack = context.getMatrices();
-		matrixStack.push();
-		matrixStack.scale(2.0f, 2.0f, 1.0f);
-		matrixStack.translate(-x / 2, -y / 2, 0.0f);
 		context.drawText(mc.textRenderer, text, x, y, color, false);
-		matrixStack.pop();
     }
 
     public static void drawBoxOutline(MatrixStack matrixStack, Box box, int color) {
