@@ -3,6 +3,7 @@ package net.nimrod.noted.playing;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -67,7 +68,7 @@ public class SongPlayer {
         songLoaderThread = null;
     } 
 
-    public void onHudRender(MatrixStack matrixStack, float tickDelta) {
+    public void onHudRender(DrawContext context, float tickDelta) {
         if (active && currentSong != null) {
             String playingString = "Now Playing: " + currentSong.getName();
             int playingStringX = mc.getWindow().getScaledWidth() - mc.textRenderer.getWidth(playingString) - 2;
@@ -75,8 +76,8 @@ public class SongPlayer {
             String timeString = TimeUtils.formatTime(currentSong.getCurrentTime()) + "/" + TimeUtils.formatTime(currentSong.getLength());
             int timeStringX = mc.getWindow().getScaledWidth() - mc.textRenderer.getWidth(timeString) - 2;
 
-            RenderUtils.drawString(matrixStack, playingString, playingStringX, 4, 0xffffff);
-            RenderUtils.drawString(matrixStack, timeString, timeStringX, 16, 0xffffff);
+            RenderUtils.drawString(context, playingString, playingStringX, 4, 0xffffff);
+            RenderUtils.drawString(context, timeString, timeStringX, 16, 0xffffff);
         }
     }
 

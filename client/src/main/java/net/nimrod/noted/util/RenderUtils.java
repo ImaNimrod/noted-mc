@@ -2,6 +2,7 @@ package net.nimrod.noted.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
@@ -13,8 +14,13 @@ public class RenderUtils {
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    public static void drawString(MatrixStack matrixStack, String text, float x, float y, int color) {
-        mc.textRenderer.drawWithShadow(matrixStack, text, x, y, color, false);
+    public static void drawString(DrawContext context, String text, int x, int y, int color) {
+		MatrixStack matrixStack = context.getMatrices();
+		matrixStack.push();
+		matrixStack.scale(2.0f, 2.0f, 1.0f);
+		matrixStack.translate(-x / 2, -y / 2, 0.0f);
+		context.drawText(mc.textRenderer, text, x, y, color, false);
+		matrixStack.pop();
     }
 
     public static void drawBoxOutline(MatrixStack matrixStack, Box box, int color) {

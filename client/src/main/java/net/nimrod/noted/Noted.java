@@ -2,6 +2,7 @@ package net.nimrod.noted;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.nimrod.noted.command.CommandManager;
@@ -28,9 +29,9 @@ public class Noted implements ModInitializer {
 		LogUtils.consoleLog("Initializing " + NAME + " v" + VERSION + " created by " + AUTHOR);
 	}
 
-    public void onHudRender(MatrixStack matrixStack, float tickDelta) {
-        RenderUtils.drawString(matrixStack, NAME + " v" + VERSION, 4, 4, 0xffffffff);
-        songPlayer.onHudRender(matrixStack, tickDelta);
+    public void onHudRender(DrawContext context, float tickDelta) {
+        RenderUtils.drawString(context, NAME + " v" + VERSION, 4, 4, 0xffffffff);
+        songPlayer.onHudRender(context, tickDelta);
     }
 
     public void onWorldRender(MatrixStack matrixStack) {
