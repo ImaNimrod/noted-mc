@@ -5,15 +5,14 @@ import java.util.Collections;
 
 public class Song {
     private final String name;
+    private final ArrayList<Note> notes = new ArrayList<Note>();
 
+    private long length = 0;
     private long startTime = 0;
     private long currentTime = 0;
-    private long length = 0;
 
-    private boolean paused = true; 
-
-    private final ArrayList<Note> notes = new ArrayList<Note>();
     private int position = 0;
+    private boolean paused = true; 
 
     public Song(String name) {
         this.name = name;

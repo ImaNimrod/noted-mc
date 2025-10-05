@@ -1,4 +1,4 @@
-package nimrod.noted.util;
+package nimrod.noted.utils;
 
 public class TimeUtils {
     public static String formatTime(long millis) {

@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -66,7 +67,8 @@ public class Noted implements ClientModInitializer {
         SONG_PLAYER.onRender2D(context, delta);
     }
 
-    public static void onRender3D(MatrixStack matrices) {
+    public static void onRender3D(MatrixStack matrices, Camera camera) {
+        SONG_PLAYER.onRender3D(matrices, camera);
     }
 
     public static void onTick() {

@@ -3,20 +3,17 @@ package nimrod.noted.song;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import nimrod.noted.Noted;
-import nimrod.noted.util.RenderUtils;
-import nimrod.noted.util.TimeUtils;
+import nimrod.noted.utils.RenderUtils;
+import nimrod.noted.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +25,13 @@ import static nimrod.noted.Noted.MC;
 public class SongPlayer {
     public Song currentSong = null;
 
-    private State state = State.WAITING;
-    private boolean paused = false;
-
     private final List<BlockPos> noteBlockStage = new ArrayList<>();
-    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();
     private final HashMap<BlockPos, Integer> pitchMap = new HashMap<>();
-
+    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();
     private final int tuneNoteBlockDelay = 5;
+
+    private boolean paused = false;
+    private State state = State.WAITING;
     private int tuneNoteBlockDelayCount = 0;
 
     public String getStatus() {
@@ -55,6 +51,7 @@ public class SongPlayer {
         if (this.currentSong != null) {
             reset();
         }
+
         this.currentSong = song;
     }
 
@@ -89,30 +86,31 @@ public class SongPlayer {
         }
     }
 
-    public void onRender3D(MatrixStack matrixStack) {
-        /*
+    public void onRender3D(MatrixStack matrices, Camera camera) {
         switch (state) {
             case STAGING:
             case TUNING:
-                for (BlockPos noteBlock : noteBlockStage)
-                    RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
+                for (BlockPos noteBlock : noteBlockStage) {
+                    RenderUtils.draw3DBox(matrices, camera, new Box(noteBlock), 0xffffff);
+                }
                 break;
             case PLAYING:
                 for (BlockPos noteBlock : noteBlockStage) {
                     if (playedNoteBlocks.contains(noteBlock)) {
-                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+                        RenderUtils.draw3DBox(matrices, camera, new Box(noteBlock), 0x14ec05);
                     } else {
                         Integer pitch = pitchMap.get(noteBlock);
-                        if (pitch == null)
+                        if (pitch == null) {
                             continue;
+                        }
 
-                        if (pitch != getNoteBlockNote(noteBlock))
-                            RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+                        if (pitch != getNoteBlockNote(noteBlock)) {
+                            RenderUtils.draw3DBox(matrices, camera, new Box(noteBlock), 0xed0524);
+                        }
                     }
                 }
                 break;
         }
-        */
     }
 
     public void onTick() {
@@ -184,11 +182,10 @@ public class SongPlayer {
     private void locateNotBlockStage() {
         noteBlockStage.clear();  
 
-        for (int y = -4; y < 4; y++) {
-            for (int x = -4; x < 4; x++) {
-                for (int z = -4; z < 4; z++) {
+        for (int y = -4; y <= 4; y++) {
+            for (int x = -4; x <= 4; x++) {
+                for (int z = -4; z <= 4; z++) {
                     BlockPos blockPos = MC.player.getBlockPos().add(x, y + 1, z); // y + 1 accounts for eye height
-
                     if (!isValidNoteBlock(blockPos)) {
                         continue;
                     }
