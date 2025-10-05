@@ -46,8 +46,4 @@ public abstract class Command {
     public String getSyntax() {
         return syntax;
     }
-
-    public boolean execute(String[] args) {
-        return true;
-    }
 }
