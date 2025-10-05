@@ -38,7 +38,7 @@ public class SongPlayer {
         switch (state) {
             case STAGING:
             case TUNING:
-                return "Getting ready to play " + currentSong.getName();
+                return "Tuning to play: " + currentSong.getName();
             case PLAYING:
                 return String.format("Playing: %s | Time: %s/%s",
                     currentSong.getName(), TimeUtils.formatTime(currentSong.getCurrentTime()), TimeUtils.formatTime(currentSong.getLength()));
@@ -72,18 +72,13 @@ public class SongPlayer {
     }
 
     public void onRender2D(DrawContext context, float tickDelta) {
-        if (currentSong != null) {
-            String playingString = "Now Playing: " + currentSong.getName();
-            int playingStringX = MC.getWindow().getScaledWidth() - MC.textRenderer.getWidth(playingString) - 2;
-
-            String timeString = TimeUtils.formatTime(currentSong.getCurrentTime()) + "/" + TimeUtils.formatTime(currentSong.getLength());
-            int timeStringX = MC.getWindow().getScaledWidth() - MC.textRenderer.getWidth(timeString) - 2;
-
-            int yLocation = MC.getWindow().getScaledHeight() - 16;
-
-            context.drawText(MC.textRenderer, playingString, playingStringX, yLocation - 12, 0xffffff, true);
-            context.drawText(MC.textRenderer, timeString, timeStringX, yLocation, 0xffffff, true);
+        if (currentSong == null) {
+            return;
         }
+
+        context.state.goUpLayer();
+        context.drawText(MC.textRenderer, getStatus(), 5, MC.getWindow().getScaledHeight() - 24, 0xffffffff, true);
+        context.drawText(MC.textRenderer, Noted.getAttribution(), 5, MC.getWindow().getScaledHeight() - 12, 0xffffffff, true);
     }
 
     public void onRender3D(MatrixStack matrices, Camera camera) {

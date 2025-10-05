@@ -13,7 +13,7 @@ public class InfoCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            Noted.chatMessage(String.format("%s v%s created by %s", Noted.NAME, Noted.VERSION, Noted.AUTHOR));
+            Noted.chatMessage(Noted.getAttribution());
             return SINGLE_SUCCESS;
         });
     }

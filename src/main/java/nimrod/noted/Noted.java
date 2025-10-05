@@ -31,7 +31,7 @@ public class Noted implements ClientModInitializer {
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     public static final SongPlayer SONG_PLAYER = new SongPlayer();
 
-    private static final String CHAT_PREFIX = "§6[ + MOD_ID + ]§r ";
+    private static final String CHAT_PREFIX = "§6[" + MOD_ID + "]§r ";
 
     static {
         ModMetadata metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
@@ -60,7 +60,7 @@ public class Noted implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("Initialized {} v{} created by {}", NAME, VERSION, AUTHOR);
+        LOGGER.info("Initialized {}", getAttribution());
     }
 
     public static void onRender2D(DrawContext context, float delta) {
@@ -82,5 +82,9 @@ public class Noted implements ClientModInitializer {
     public static void chatMessage(String message) {
         MutableText prefix = Text.literal(CHAT_PREFIX);
         MC.inGameHud.getChatHud().addMessage(prefix.append(Text.literal(message)));
+    }
+
+    public static String getAttribution() {
+        return String.format("%s v%s created by %s", NAME, VERSION, AUTHOR);
     }
 }

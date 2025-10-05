@@ -18,6 +18,7 @@ public class CommandManager {
     static {
         add(new HelpCommand());
         add(new InfoCommand());
+        add(new ListCommand());
         add(new PauseCommand());
         add(new PlayCommand());
         add(new StatusCommand());
