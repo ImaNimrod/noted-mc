@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.CommandSource;
+import nimrod.noted.Noted;
 import nimrod.noted.command.CommandManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +33,7 @@ public abstract class ChatInputSuggestorMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false), method = "refresh()V", cancellable = true)
     public void onRefresh(CallbackInfo ci, @Local StringReader reader) {
-        String prefix = "@"; // TODO: sync up and make a config
+        String prefix = Noted.COMMAND_PREFIX;
         int prefixLength = prefix.length();
 
         if (reader.canRead(prefixLength) && reader.getString().startsWith(prefix, reader.getCursor())) {

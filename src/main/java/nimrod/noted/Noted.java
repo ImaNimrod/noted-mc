@@ -23,6 +23,7 @@ public class Noted implements ClientModInitializer {
     public static final String VERSION;
     public static final String AUTHOR;
 
+    public static final String COMMAND_PREFIX = "@";
     public static final Path FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID);
     public static final Noted INSTANCE = new Noted();
     public static final Logger LOGGER;

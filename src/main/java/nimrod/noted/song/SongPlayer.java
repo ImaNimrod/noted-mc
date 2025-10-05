@@ -26,16 +26,16 @@ import java.util.Map.Entry;
 import static nimrod.noted.Noted.MC;
 
 public class SongPlayer {
-    public Song currentSong = null;                     /* currently playing song structure */
+    public Song currentSong = null;
 
-    private State state = State.WAITING;                /* the current state of the bot */
-    private boolean paused = false;                     /* is the current song paused */
+    private State state = State.WAITING;
+    private boolean paused = false;
 
-    private final List<BlockPos> noteBlockStage = new ArrayList<>();        /* holds the block positions of playable noteblocks */
-    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();      /* holds the block positions of the noteblocks played during a single tick */
-    private final HashMap<BlockPos, Integer> pitchMap = new HashMap<>();    /* a mapping of noteblocks to note pitches */
+    private final List<BlockPos> noteBlockStage = new ArrayList<>();
+    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();
+    private final HashMap<BlockPos, Integer> pitchMap = new HashMap<>();
 
-    private final int tuneNoteBlockDelay = 5;           /* the time between tuning individual noteblocks (in ticks) */ 
+    private final int tuneNoteBlockDelay = 5;
     private int tuneNoteBlockDelayCount = 0;
 
     public void setSong(Song song) {
@@ -43,6 +43,15 @@ public class SongPlayer {
             reset();
         }
         this.currentSong = song;
+    }
+
+    public String getStatus() {
+        if (currentSong != null) {
+            return String.format("Playing: %s | Time: %s/%s",
+                currentSong.getName(), TimeUtils.formatTime(currentSong.getCurrentTime()), TimeUtils.formatTime(currentSong.getLength()));
+        } else {
+            return "Nothing currently playing";
+        }
     }
 
     public void reset() {
@@ -114,7 +123,7 @@ public class SongPlayer {
 
                 Noted.chatMessage("Preparing noteblock stage...");
 
-                scanNoteBlockStage();
+                locateNotBlockStage();
                 if (noteBlockStage.size() == 0) {
                     Noted.chatMessage("Could not find any noteblocks within range");
                     state = State.ERROR;
@@ -168,6 +177,24 @@ public class SongPlayer {
         return MC.world.getBlockState(blockPos).getBlock() instanceof NoteBlock && MC.world.getBlockState(blockPos.up()).isAir();
     }
 
+    private void locateNotBlockStage() {
+        noteBlockStage.clear();  
+
+        for (int y = -4; y < 4; y++) {
+            for (int x = -4; x < 4; x++) {
+                for (int z = -4; z < 4; z++) {
+                    BlockPos blockPos = MC.player.getBlockPos().add(x, y + 1, z); // y + 1 accounts for eye height
+
+                    if (!isValidNoteBlock(blockPos)) {
+                        continue;
+                    }
+
+                    noteBlockStage.add(blockPos);
+                }
+            }
+        }
+    }
+
     private void playNoteBlock(BlockPos blockPos) {
         if (!isValidNoteBlock(blockPos)) {
             return;
@@ -205,36 +232,9 @@ public class SongPlayer {
         }
     }
 
-    private void scanNoteBlockStage() {
-        noteBlockStage.clear();  
-
-        /* locate all playable noteblocks within reach of the player */
-        for (int y = -4; y < 4; y++) {
-            for (int x = -4; x < 4; x++) {
-                for (int z = -4; z < 4; z++) {
-                    BlockPos blockPos = MC.player.getBlockPos().add(x, y + 1, z); // y + 1 accounts for eye height
-
-                    if (!isValidNoteBlock(blockPos)) {
-                        continue;
-                    }
-
-                    /*
-                    double distSquared = MC.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(blockPos));
-                    if (distSquared > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) {
-                        continue;
-                    }
-                    */
-
-                    noteBlockStage.add(blockPos);
-                }
-            }
-        }
-    }
-
     private void setupPitchMap() {
         pitchMap.clear();
 
-        /* define the requirements (distinct notes) of the song */
         List<Note> songRequirements = new ArrayList<>();
         currentSong.getNotes().stream().distinct().forEach(songRequirements::add);
 

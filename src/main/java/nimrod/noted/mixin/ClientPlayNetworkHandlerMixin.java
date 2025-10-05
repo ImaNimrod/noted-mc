@@ -2,6 +2,7 @@ package nimrod.noted.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import nimrod.noted.Noted;
 import nimrod.noted.command.CommandManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +15,7 @@ import static nimrod.noted.Noted.MC;
 public class ClientPlayNetworkHandlerMixin {
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo ci) {
-        String prefix = "@"; // TODO: make an actual config variable
+        String prefix = Noted.COMMAND_PREFIX;
         if (message.startsWith(prefix)) {
             try {
                 CommandManager.dispatch(message.substring(prefix.length()));

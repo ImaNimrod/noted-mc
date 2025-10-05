@@ -20,6 +20,7 @@ public class CommandManager {
         add(new InfoCommand());
         add(new PauseCommand());
         add(new PlayCommand());
+        add(new StatusCommand());
         add(new StopCommand());
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }
