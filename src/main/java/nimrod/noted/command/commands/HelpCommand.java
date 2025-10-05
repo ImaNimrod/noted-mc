@@ -23,7 +23,6 @@ public class HelpCommand extends Command {
 
             Noted.chatMessage("Commands:");
             Noted.chatMessage(stringBuilder.substring(0, stringBuilder.length() - 2));
-
             return SINGLE_SUCCESS;
         });
 

@@ -15,7 +15,7 @@ import static nimrod.noted.Noted.MC;
 public class ClientPlayNetworkHandlerMixin {
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo ci) {
-        String prefix = Noted.COMMAND_PREFIX;
+        String prefix = Noted.CONFIG.commandPrefix;
         if (message.startsWith(prefix)) {
             try {
                 CommandManager.dispatch(message.substring(prefix.length()));

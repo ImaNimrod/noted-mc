@@ -214,7 +214,9 @@ public class SongPlayer {
         currentSong.play(); 
         currentSong.advanceCurrentTime();
 
-        //MC.player.swingHand(Hand.MAIN_HAND);
+        if (Noted.CONFIG.swingHand) {
+            MC.player.swingHand(Hand.MAIN_HAND);
+        }
 
         while (currentSong.reachedNextNote()) {
             Note note = currentSong.getNextNote();
@@ -283,7 +285,9 @@ public class SongPlayer {
 
                 tuneNoteBlockDelayCount = 0;
 
-                //MC.player.swingHand(Hand.MAIN_HAND);
+                if (Noted.CONFIG.swingHand) {
+                    MC.player.swingHand(Hand.MAIN_HAND);
+                }
 
                 int targetNote = e.getValue() < currentNote ? e.getValue() + 25 : e.getValue();
                 int requiredHits = Math.min(25, targetNote - currentNote);
