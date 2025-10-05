@@ -38,20 +38,24 @@ public class SongPlayer {
     private final int tuneNoteBlockDelay = 5;
     private int tuneNoteBlockDelayCount = 0;
 
+    public String getStatus() {
+        switch (state) {
+            case STAGING:
+            case TUNING:
+                return "Getting ready to play " + currentSong.getName();
+            case PLAYING:
+                return String.format("Playing: %s | Time: %s/%s",
+                    currentSong.getName(), TimeUtils.formatTime(currentSong.getCurrentTime()), TimeUtils.formatTime(currentSong.getLength()));
+            default:
+                return "Nothing currently playing";
+        }
+    }
+
     public void setSong(Song song) {
         if (this.currentSong != null) {
             reset();
         }
         this.currentSong = song;
-    }
-
-    public String getStatus() {
-        if (currentSong != null) {
-            return String.format("Playing: %s | Time: %s/%s",
-                currentSong.getName(), TimeUtils.formatTime(currentSong.getCurrentTime()), TimeUtils.formatTime(currentSong.getLength()));
-        } else {
-            return "Nothing currently playing";
-        }
     }
 
     public void reset() {

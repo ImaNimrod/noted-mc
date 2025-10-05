@@ -20,7 +20,7 @@ public abstract class MinecraftClientMixin {
     @Inject(at = @At("TAIL"), method = "tick()V")
     private void onTick(CallbackInfo ci) {
         if (player != null && world != null) {
-            Noted.INSTANCE.onTick();
+            Noted.onTick();
         }
     }
 }

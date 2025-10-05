@@ -17,7 +17,7 @@ public class WorldRendererMixin {
     /*
     @Inject(method = "render", at = @At("RETURN"))
     private void onRender(MatrixStack matrixStack, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
-        Noted.INSTANCE.onWorldRender(matrixStack);
+        Noted.onWorldRender(matrixStack);
     }
     */
 }

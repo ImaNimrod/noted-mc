@@ -14,7 +14,7 @@ public class StopCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             Noted.chatMessage("Stopped playing");
-            Noted.INSTANCE.songPlayer.togglePaused();
+            Noted.SONG_PLAYER.togglePaused();
             return SINGLE_SUCCESS;
         });
     }

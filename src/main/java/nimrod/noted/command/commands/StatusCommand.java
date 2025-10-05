@@ -13,7 +13,7 @@ public class StatusCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            Noted.chatMessage(Noted.INSTANCE.songPlayer.getStatus());
+            Noted.chatMessage(Noted.SONG_PLAYER.getStatus());
             return SINGLE_SUCCESS;
         });
     }

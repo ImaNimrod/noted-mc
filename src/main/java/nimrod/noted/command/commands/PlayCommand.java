@@ -23,7 +23,7 @@ public class PlayCommand extends Command {
 
             try {
                 Song song = MidiConverter.getSongFromBytes(Files.readAllBytes(midiFile), midiFile.getFileName().toString());
-                Noted.INSTANCE.songPlayer.setSong(song);
+                Noted.SONG_PLAYER.setSong(song);
             } catch (Exception e) {
                 e.printStackTrace();
             }
