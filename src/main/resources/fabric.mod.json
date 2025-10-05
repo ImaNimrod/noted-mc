@@ -16,6 +16,9 @@
     "entrypoints": {
         "client": [
             "nimrod.noted.Noted"
+        ],
+        "modmenu": [
+            "nimrod.noted.ModMenuIntegration"
         ]
     },
     "mixins": [

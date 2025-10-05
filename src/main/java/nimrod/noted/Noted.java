@@ -31,7 +31,7 @@ public class Noted implements ClientModInitializer {
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     public static final SongPlayer SONG_PLAYER = new SongPlayer();
 
-    private static final String CHAT_PREFIX = "\u00a76[noted]\u00a7r ";
+    private static final String CHAT_PREFIX = "§6[ + MOD_ID + ]§r ";
 
     static {
         ModMetadata metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();

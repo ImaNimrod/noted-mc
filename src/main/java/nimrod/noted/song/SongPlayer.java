@@ -251,12 +251,11 @@ public class SongPlayer {
                 int instrument = note.getNoteId() / 25;
                 int noteBlockInstrument = getNoteBlockInstrument(blockPos).ordinal();
 
-                if (instrument == noteBlockInstrument && pitchMap.entrySet()
+                if (instrument == noteBlockInstrument && pitchMap
+                .entrySet()
                 .stream()
                 .filter(e -> e.getValue() == pitch)
-                .noneMatch(e -> getNoteBlockInstrument(e.getKey())
-                    .ordinal() == noteBlockInstrument)) 
-            {
+                .noneMatch(e -> getNoteBlockInstrument(e.getKey()).ordinal() == noteBlockInstrument)) {
                     pitchMap.put(blockPos, pitch);
                     break;
                 }
@@ -279,23 +278,25 @@ public class SongPlayer {
                 continue;
             }
 
-            if (currentNote != e.getValue()) {
-                if (++tuneNoteBlockDelayCount < tuneNoteBlockDelay) {
-                    return;
-                }
+            if (currentNote == e.getValue()) {
+                continue;
+            }
 
-                tuneNoteBlockDelayCount = 0;
+            if (++tuneNoteBlockDelayCount < tuneNoteBlockDelay) {
+                return;
+            }
 
-                if (Noted.CONFIG.swingHand) {
-                    MC.player.swingHand(Hand.MAIN_HAND);
-                }
+            tuneNoteBlockDelayCount = 0;
 
-                int targetNote = e.getValue() < currentNote ? e.getValue() + 25 : e.getValue();
-                int requiredHits = Math.min(25, targetNote - currentNote);
+            if (Noted.CONFIG.swingHand) {
+                MC.player.swingHand(Hand.MAIN_HAND);
+            }
 
-                for (int i = 0; i < requiredHits; i++) {
-                    tuneNoteBlock(e.getKey());
-                }
+            int targetNote = e.getValue() < currentNote ? e.getValue() + 25 : e.getValue();
+            int requiredHits = Math.min(25, targetNote - currentNote);
+
+            for (int i = 0; i < requiredHits; i++) {
+                tuneNoteBlock(e.getKey());
             }
         }
 
