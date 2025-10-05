@@ -1,0 +1,29 @@
+{
+    "schemaVersion": 1,
+    "id": "noted",
+    "version": "${version}",
+    "name": "Noted",
+    "description": "In-development noteblock player mod.",
+    "authors": [
+        "nimrod"
+    ],
+    "contact": {
+        "sources": "https://github.com/ImaNimrod/noted-mc.git"
+    },
+    "license": "UNLICENSED",
+    "icon": "assets/noted/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            "nimrod.noted.Noted"
+        ]
+    },
+    "mixins": [
+        "noted.mixins.json"
+    ],
+    "depends": {
+        "java": ">=21",
+        "fabricloader": ">=0.16.1",
+        "minecraft": "1.21.8"
+    }
+}

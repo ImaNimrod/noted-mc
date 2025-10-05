@@ -1,0 +1,308 @@
+package nimrod.noted.song;
+
+import net.minecraft.block.NoteBlock;
+import net.minecraft.block.enums.NoteBlockInstrument;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import nimrod.noted.Noted;
+import nimrod.noted.util.RenderUtils;
+import nimrod.noted.util.TimeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+import static nimrod.noted.Noted.MC;
+
+public class SongPlayer {
+    public Song currentSong = null;                     /* currently playing song structure */
+
+    private State state = State.WAITING;                /* the current state of the bot */
+    private boolean paused = false;                     /* is the current song paused */
+
+    private final List<BlockPos> noteBlockStage = new ArrayList<>();        /* holds the block positions of playable noteblocks */
+    private final List<BlockPos> playedNoteBlocks = new ArrayList<>();      /* holds the block positions of the noteblocks played during a single tick */
+    private final HashMap<BlockPos, Integer> pitchMap = new HashMap<>();    /* a mapping of noteblocks to note pitches */
+
+    private final int tuneNoteBlockDelay = 5;           /* the time between tuning individual noteblocks (in ticks) */ 
+    private int tuneNoteBlockDelayCount = 0;
+
+    public void setSong(Song song) {
+        if (this.currentSong != null) {
+            reset();
+        }
+        this.currentSong = song;
+    }
+
+    public void reset() {
+        currentSong = null;
+        state = State.WAITING;
+        paused = false;
+    } 
+
+    public void togglePaused() {
+        if (currentSong == null) {
+            Noted.chatMessage("No song playing");
+            return;
+        }
+
+        paused = !paused;
+        Noted.chatMessage("Song " + (paused ? "§cpaused§f" : "§aunpaused§f"));
+    }
+
+    public void onRender2D(DrawContext context, float tickDelta) {
+        if (currentSong != null) {
+            String playingString = "Now Playing: " + currentSong.getName();
+            int playingStringX = MC.getWindow().getScaledWidth() - MC.textRenderer.getWidth(playingString) - 2;
+
+            String timeString = TimeUtils.formatTime(currentSong.getCurrentTime()) + "/" + TimeUtils.formatTime(currentSong.getLength());
+            int timeStringX = MC.getWindow().getScaledWidth() - MC.textRenderer.getWidth(timeString) - 2;
+
+            int yLocation = MC.getWindow().getScaledHeight() - 16;
+
+            context.drawText(MC.textRenderer, playingString, playingStringX, yLocation - 12, 0xffffff, true);
+            context.drawText(MC.textRenderer, timeString, timeStringX, yLocation, 0xffffff, true);
+        }
+    }
+
+    public void onRender3D(MatrixStack matrixStack) {
+        /*
+        switch (state) {
+            case STAGING:
+            case TUNING:
+                for (BlockPos noteBlock : noteBlockStage)
+                    RenderUtils.drawBoxOutline(matrixStack, new Box(noteBlock), 0xffffff);
+                break;
+            case PLAYING:
+                for (BlockPos noteBlock : noteBlockStage) {
+                    if (playedNoteBlocks.contains(noteBlock)) {
+                        RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0x14ec05);
+                    } else {
+                        Integer pitch = pitchMap.get(noteBlock);
+                        if (pitch == null)
+                            continue;
+
+                        if (pitch != getNoteBlockNote(noteBlock))
+                            RenderUtils.drawBoxFilled(matrixStack, new Box(noteBlock), 0xed0524);
+                    }
+                }
+                break;
+        }
+        */
+    }
+
+    public void onTick() {
+        switch (state) {
+            case WAITING:
+                if (currentSong != null) {
+                    state = State.STAGING;
+                }
+                break;
+            case STAGING:
+                centerPlayer();
+
+                Noted.chatMessage("Preparing noteblock stage...");
+
+                scanNoteBlockStage();
+                if (noteBlockStage.size() == 0) {
+                    Noted.chatMessage("Could not find any noteblocks within range");
+                    state = State.ERROR;
+                    break;
+                }
+
+                setupPitchMap();
+                if (pitchMap.isEmpty()) {
+                    Noted.chatMessage("Could not create pitch to noteblock mapping");
+                    state = State.ERROR;
+                    break;
+                }
+
+                Noted.chatMessage("Tuning noteblocks...");
+                state = State.TUNING;
+                break;
+            case TUNING:
+                tuneNoteBlocks();
+                break; 
+            case PLAYING:
+                playSongTick();
+                break;
+            case ERROR:
+                reset();
+                break;
+        }
+    }
+
+    private void centerPlayer() {
+        MC.player.setPosition(MathHelper.floor(MC.player.getX()) + 0.5, MC.player.getY(), MathHelper.floor(MC.player.getZ()) + 0.5);
+        MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(MC.player.getPos(), MC.player.isOnGround(), MC.player.horizontalCollision));
+    }
+
+    private NoteBlockInstrument getNoteBlockInstrument(BlockPos blockPos) {
+        if (!isValidNoteBlock(blockPos)) {
+            return NoteBlockInstrument.HARP;
+        }
+
+        return MC.world.getBlockState(blockPos).get(NoteBlock.INSTRUMENT);
+    }
+
+    private int getNoteBlockNote(BlockPos blockPos) {
+        if (!isValidNoteBlock(blockPos)) {
+            return -1;
+        }
+
+        return MC.world.getBlockState(blockPos).get(NoteBlock.NOTE);
+    }
+
+    private boolean isValidNoteBlock(BlockPos blockPos) {
+        return MC.world.getBlockState(blockPos).getBlock() instanceof NoteBlock && MC.world.getBlockState(blockPos.up()).isAir();
+    }
+
+    private void playNoteBlock(BlockPos blockPos) {
+        if (!isValidNoteBlock(blockPos)) {
+            return;
+        }
+
+        MC.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.DOWN, 0));
+    }
+
+    private void playSongTick() {
+        if (paused) {
+            currentSong.pause();
+            return;
+        }
+
+        playedNoteBlocks.clear();
+
+        currentSong.play(); 
+        currentSong.advanceCurrentTime();
+
+        //MC.player.swingHand(Hand.MAIN_HAND);
+
+        while (currentSong.reachedNextNote()) {
+            Note note = currentSong.getNextNote();
+
+            for (Entry<BlockPos, Integer> e : pitchMap.entrySet()) {
+                if (note.getNoteId() % 25 == getNoteBlockNote(e.getKey())) {
+                    playedNoteBlocks.add(e.getKey());
+                    playNoteBlock(e.getKey());
+                }
+            }
+        }
+
+        if (currentSong.finished()) {
+            reset();
+        }
+    }
+
+    private void scanNoteBlockStage() {
+        noteBlockStage.clear();  
+
+        /* locate all playable noteblocks within reach of the player */
+        for (int y = -4; y < 4; y++) {
+            for (int x = -4; x < 4; x++) {
+                for (int z = -4; z < 4; z++) {
+                    BlockPos blockPos = MC.player.getBlockPos().add(x, y + 1, z); // y + 1 accounts for eye height
+
+                    if (!isValidNoteBlock(blockPos)) {
+                        continue;
+                    }
+
+                    /*
+                    double distSquared = MC.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(blockPos));
+                    if (distSquared > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) {
+                        continue;
+                    }
+                    */
+
+                    noteBlockStage.add(blockPos);
+                }
+            }
+        }
+    }
+
+    private void setupPitchMap() {
+        pitchMap.clear();
+
+        /* define the requirements (distinct notes) of the song */
+        List<Note> songRequirements = new ArrayList<>();
+        currentSong.getNotes().stream().distinct().forEach(songRequirements::add);
+
+        for (Note note : songRequirements) {
+            for (BlockPos blockPos : noteBlockStage) {
+                if (pitchMap.containsKey(blockPos)) {
+                    continue;
+                }
+
+                int pitch = note.getNoteId() % 25;
+                int instrument = note.getNoteId() / 25;
+                int noteBlockInstrument = getNoteBlockInstrument(blockPos).ordinal();
+
+                if (instrument == noteBlockInstrument && pitchMap.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == pitch)
+                .noneMatch(e -> getNoteBlockInstrument(e.getKey())
+                    .ordinal() == noteBlockInstrument)) 
+            {
+                    pitchMap.put(blockPos, pitch);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void tuneNoteBlock(BlockPos blockPos) {
+        if (!isValidNoteBlock(blockPos)) {
+            return;
+        }
+
+        MC.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(blockPos), Direction.DOWN, blockPos, false), 0));
+    }
+
+    private void tuneNoteBlocks() {
+        for (Entry<BlockPos, Integer> e : pitchMap.entrySet()) {
+            int currentNote = getNoteBlockNote(e.getKey());
+            if (currentNote == -1) {
+                continue;
+            }
+
+            if (currentNote != e.getValue()) {
+                if (++tuneNoteBlockDelayCount < tuneNoteBlockDelay) {
+                    return;
+                }
+
+                tuneNoteBlockDelayCount = 0;
+
+                //MC.player.swingHand(Hand.MAIN_HAND);
+
+                int targetNote = e.getValue() < currentNote ? e.getValue() + 25 : e.getValue();
+                int requiredHits = Math.min(25, targetNote - currentNote);
+
+                for (int i = 0; i < requiredHits; i++) {
+                    tuneNoteBlock(e.getKey());
+                }
+            }
+        }
+
+        Noted.chatMessage("Playing song...");
+        state = State.PLAYING;
+    }
+
+    enum State {
+        WAITING,
+        STAGING,
+        TUNING,
+        PLAYING,
+        ERROR,
+    }
+}

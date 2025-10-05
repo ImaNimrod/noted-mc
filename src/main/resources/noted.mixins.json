@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "package": "nimrod.noted.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        "ChatInputSuggestorMixin",
+        "ClientPlayNetworkHandlerMixin",
+        "InGameHudMixin",
+        "MinecraftClientMixin",
+        "WorldRendererMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
