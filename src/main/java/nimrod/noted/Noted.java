@@ -1,6 +1,7 @@
 package nimrod.noted;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
@@ -61,6 +62,10 @@ public class Noted implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LOGGER.info("Initialized {}", getAttribution());
+
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            SONG_PLAYER.reset();
+        });
     }
 
     public static void onRender2D(DrawContext context, float delta) {
