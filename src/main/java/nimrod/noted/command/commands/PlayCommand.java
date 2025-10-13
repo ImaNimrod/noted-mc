@@ -25,6 +25,7 @@ public class PlayCommand extends Command {
                 Song song = MidiConverter.getSongFromBytes(Files.readAllBytes(midiFile), midiFile.getFileName().toString());
                 Noted.SONG_PLAYER.setSong(song);
             } catch (Exception e) {
+                Noted.chatMessage("Unable to load MIDI file: " + e.toString());
                 e.printStackTrace();
             }
 
